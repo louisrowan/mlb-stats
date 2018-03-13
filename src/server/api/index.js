@@ -3,7 +3,7 @@
 const Fs = require('fs');
 const Path = require('path');
 const Routes = require('express').Router();
-const PlayersData = './data/players.csv';
+const PlayersData = './data/names.csv';
 const BattingData = './data/batting.csv';
 
 
@@ -14,8 +14,19 @@ internals.formatPlayerData = (stringData) => {
     const data = stringData.split(',');
     const res = {};
     res.id = data[0];
-    res.birthYear = data[1];
-    res.fullName = data[13] + " " + data[14];
+    res.fullName = data[3];
+    res.debut = data[4];
+    res.finalGame = data[5];
+    res.positions = data[6] ? data[6].split('-') : [];
+    res.teams = data[7] ? data[7].split('-').map((t) => {
+
+        const split = t.split(':');
+        return {
+            name: split[0],
+            abbreviation: split[1]
+        }
+    }) : [];
+
     return res;
 }
 
@@ -41,30 +52,17 @@ internals.formatBattingData = (data) => {
 
 Routes.get('/players', (req, res) => {
 
-    const streamingData = Fs.createReadStream(Path.resolve(__dirname, PlayersData));
-
     const players = [];
-    let headersSeen = false;
 
-    streamingData.on('readable', () => {
+    const raw = Fs.readFileSync(Path.resolve(__dirname, PlayersData));
+    const stringified = raw.toString();
 
-        const data = streamingData.read();
+    stringified.split('\n').forEach((s) => {
 
-        if (data && headersSeen) {
+        if (s) players.push(internals.formatPlayerData(s));
+    });
 
-            const stringified = data.toString();
-            stringified.split('\n').forEach((s) => {
-
-                players.push(internals.formatPlayerData(s));
-            });
-        }
-        if (!headersSeen) headersSeen = true;
-    })
-
-    streamingData.on('end', (err) => {
-
-        res.send(players);
-    })
+    res.send(players);
 });
 
 Routes.get('/player/:id/batting', (req, res) => {
@@ -97,7 +95,6 @@ Routes.get('/player/:id/batting', (req, res) => {
 
         res.send(years);
     });
-
 })
 
 module.exports = Routes;

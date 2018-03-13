@@ -2,6 +2,26 @@ const React = require('react');
 const Axios = require('axios');
 const ReactDOM = require('react-dom');
 
+
+const PlayerListItem = (props) => {
+
+    const {
+        id,
+        fullName,
+        teams
+    } = props.player;
+
+    const { handleActivePlayerChange} = props;
+
+    return (
+        <li onClick={() => handleActivePlayerChange(id)}>
+            {fullName} | {teams.map((t) => <span>{`${t.abbreviation} `}</span>)}
+        </li>
+    )
+}
+
+
+
 class App extends React.Component {
 
     constructor() {
@@ -16,6 +36,8 @@ class App extends React.Component {
 
         Axios.get('/api/players')
             .then(res => {
+
+                console.log('req made', res.data);
 
                 this.setState({ players: res.data })
             })
@@ -33,10 +55,10 @@ class App extends React.Component {
         this.setState({ searchTerm });
     }
 
-    handleActivePlayerChange (player) {
+    handleActivePlayerChange (playerId) {
 
 
-        Axios.get('/api/player/' + player.id + '/batting')
+        Axios.get('/api/player/' + playerId + '/batting')
             .then(res => {
 
                 console.log('d', res.data);
@@ -52,24 +74,51 @@ class App extends React.Component {
 
         const { activePlayer, players, searchTerm } = this.state;
 
-        const splitTerm = searchTerm ? searchTerm.toLowerCase().split(' ') : [];
+        const splitTerm = searchTerm ? searchTerm.toLowerCase().split(' ').filter((t) => t != "") : [];
 
+        let filterCount = 0;
         const filter = players.length > 0 ? players.filter((p) => {
 
-            const name = p.fullName.toLowerCase();
-            const birthYear = p.birthYear ? p.birthYear.toString() : '';
+            if (filterCount > 10) {
+                return false;
+            }
+
+            const matchingFields = [];
+
+            if (p.fullName) matchingFields.push(p.fullName.toLowerCase())
+            if (p.debut) matchingFields.push(p.debut.toString());
+
+            p.positions.forEach((pos) => matchingFields.push(pos.toLowerCase()));
+
+            p.teams.forEach((team) => {
+
+                if (team.name) matchingFields.push(team.name.toLowerCase());
+                if (team.abbreviation) matchingFields.push(team.abbreviation.toLowerCase());
+            });
 
             let match = true;
             splitTerm.forEach((term) => {
 
-                if (!name.includes(term) && !birthYear.includes(term)) {
-                    match = false;
-                }
+                let found = false;
+                matchingFields.forEach((field) => {
+                    if (field && field.includes(term)) {
+                        found = true;
+                    }
+                })
+                if (!found) match = false;
+
             })
-            return match;
+
+            if (match) {
+                ++filterCount
+                return true;
+            }
+            else {
+                return false;
+            }
         }).map((player, i) => {
 
-            return <p onClick={() => this.handleActivePlayerChange(player)}>{player.fullName}: {player.birthYear}</p>
+            return <PlayerListItem player={player} handleActivePlayerChange={this.handleActivePlayerChange} />
         }) : '';
 
 
