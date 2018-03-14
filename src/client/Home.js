@@ -62,7 +62,7 @@ class Home extends React.Component {
     handleActivePlayerChange (playerId) {
 
 
-        Axios.get('/api/player/' + playerId + '/batting')
+        Axios.get('/api/players/' + playerId + '/batting')
             .then(res => {
 
                 console.log('d', res.data);

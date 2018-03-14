@@ -4,7 +4,7 @@ const Fs = require('fs');
 const Path = require('path');
 const Routes = require('express').Router();
 const PlayersData = './data/names.csv';
-const BattingData = './data/batting.csv';
+const BattingData = './data/formattedBatting.csv';
 
 
 const internals = {};
@@ -33,20 +33,48 @@ internals.formatPlayerData = (stringData) => {
 internals.formatBattingData = (data) => {
 
     const res = {};
+    res.id = data[0]
     res.year = data[1];
-    res.games = data[5];
-    res.atBats = data[6];
-    res.runs = data[7];
-    res.hits = data[8];
-    res.doubles = data[9];
-    res.triples = data[10];
-    res.homeRuns = data[11];
-    res.rbi = data[12];
-    res.sb = data[13];
-    res.cs = data[14];
-    res.bb = data[15];
-    res.k = data[16];
+    res.teamId = data[2]
+    res.games = data[3];
+    res.atBats = data[4];
+    res.runs = data[5];
+    res.hits = data[6];
+    res.doubles = data[7];
+    res.triples = data[8];
+    res.homeRuns = data[9];
+    res.rbi = data[10];
+    res.sb = data[11];
+    res.cs = data[12];
+    res.bb = data[13];
+    res.k = data[14];
     return res;
+}
+
+internals.findId = (array, id) => {
+
+    const length = array.length;
+    if (length === 1) {
+        if (array[0] === id) {
+            return 0;
+        }
+        else {
+            console.error('ID not found:', id)
+            return new Error('id not found', id);
+        }
+    }
+
+    const midpoint = Math.floor(length / 2);
+
+    if (array[midpoint] === id) {
+        return midpoint;
+    }
+    if (array[midpoint] > id) {
+        return internals.findId(array.slice(0, midpoint), id);
+    }
+    else {
+        return midpoint + internals.findId(array.slice(midpoint, length), id);
+    }
 }
 
 
@@ -65,36 +93,37 @@ Routes.get('/players', (req, res) => {
     res.send(players);
 });
 
-Routes.get('/player/:id/batting', (req, res) => {
+Routes.get('/players/:id/batting', (req, res) => {
+
+    const start = Date.now();
 
     const playerId = req.params.id;
-    
-    const streamingData = Fs.createReadStream(Path.resolve(__dirname, BattingData))
-
     const years = [];
-    let headersSeen = false;
+    
+    const raw = Fs.readFileSync(Path.resolve(__dirname, BattingData))
+    const stringified = raw.toString();
 
-    streamingData.on('readable', () => {
 
-        const data = streamingData.read();
+    const battingStatsArray = stringified.split('\n');
+    const idsOnly = battingStatsArray.map((str) => str.split(',')[0]);
+    const indexInArray = internals.findId(idsOnly, playerId);
 
-        if (data && headersSeen) {
+    let startIndex = indexInArray;
+    while (idsOnly[startIndex] === playerId) {
+        --startIndex;
+    }
 
-            const stringified = data.toString();
-            stringified.split('\n').forEach((s) => {
+    let endIndex = indexInArray;
+    while (idsOnly[endIndex] === playerId) {
+        ++endIndex;
+    }
 
-                const splitData = s.split(',');
+    const matchingStats = battingStatsArray.slice(startIndex + 1, endIndex);
 
-                if (splitData[0] == playerId) years.push(internals.formatBattingData(splitData));
-            })
-        }
-        if (!headersSeen) headersSeen = true;
-    });
+    const splitMatchingStats = matchingStats.map((year) => year.split(','));
+    const formattedMatchingStats = splitMatchingStats.map((year) => internals.formatBattingData(year));
 
-    streamingData.on('end', (err) => {
-
-        res.send(years);
-    });
+    res.send(formattedMatchingStats);
 })
 
 module.exports = Routes;
