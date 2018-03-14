@@ -14,8 +14,13 @@ const PlayerListItem = (props) => {
     const { handleActivePlayerChange} = props;
 
     return (
-        <li onClick={() => handleActivePlayerChange(id)}>
-            {fullName} | {teams.map((t) => <span>{`${t.abbreviation} `}</span>)}
+        <li >
+            <button onClick={() => handleActivePlayerChange(id)}>
+                {fullName}
+            </button>
+            <span>
+                | {teams.map((t) => <span>{`${t.abbreviation} `}</span>)}
+            </span>
         </li>
     )
 }
