@@ -1,43 +1,67 @@
-'use strict';
-
-// purpose: create list sorted by HR total with
-// HR | playerId
+'use strict'
 
 const Fs = require('fs');
 const Path = require('path');
-
 const BattingStats = Path.resolve(__dirname, './formattedBatting.csv');
 
-const start = Date.now()
 
-const createSortedHrArray = () => {
+const stats = [
+    { name: 'hr', index: 9 },
+    { name: 'rbi', index: 10}
+];
+
+
+const createStatArray = (splitFile, statName, statIndex) => {
+
+    console.log('start with', statName);
 
     const unsortedArray = [];
 
-    const raw = Fs.readFileSync(BattingStats, 'utf-8');
-    const statLines = raw.split('\n');
-
-    statLines.forEach((line) => {
+    splitFile.forEach((line) => {
 
         const l = line.split(',');
 
-        const id = l[0];
-        const hr = l[9];
+        const pair = {
+            id: l[0] + "-" + l[1],
+            [statName] : l[statIndex]
+        }
 
-        unsortedArray.push({ id, hr });
+        unsortedArray.push(pair);
     });
 
-    return unsortedArray.sort((a, b) => +a.hr > +b.hr ? 1 : -1);
+    return {
+        sortedArray: unsortedArray.sort((a, b) => +a[statName] > +b[statName] ? 1 : -1),
+        statName: statName
+    };
 }
 
-const writeArrayToFile = (array) => {
+
+const readData = () => {
+
+    const raw = Fs.readFileSync(BattingStats, 'utf-8');
+    return raw.split('\n');
+}
+
+
+const data = readData();
+
+
+const results = stats.map((s) => {
+
+    return createStatArray(data, s.name, s.index);
+})
+
+
+results.forEach((result) => {
+
+    const { sortedArray, statName } = result;
 
     let file = '';
-    const destination = Path.resolve(__dirname, './indexedStats/indexedHomeRuns.csv');
+    const destination = Path.resolve(__dirname, `./indexedStats/indexed-${statName}.csv`);
 
-    array.forEach((obj) => {
+    sortedArray.forEach((obj) => {
 
-        const str = `${obj.hr},${obj.id}\n`;
+        const str = `${obj[statName]},${obj.id}\n`;
         file += str;
     });
 
@@ -45,7 +69,4 @@ const writeArrayToFile = (array) => {
 
         console.log(`err writing to ${destination}?:`, err);
     });
-}
-
-const arr = createSortedHrArray();
-writeArrayToFile(arr);
+});

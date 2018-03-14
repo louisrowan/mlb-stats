@@ -49,6 +49,7 @@ class Home extends React.Component {
 
         this.handleSearchTermChange = this.handleSearchTermChange.bind(this);
         this.handleActivePlayerChange = this.handleActivePlayerChange.bind(this);
+        this.findStats = this.findStats.bind(this);
     }
 
 
@@ -70,6 +71,28 @@ class Home extends React.Component {
                 this.setState({ activePlayer: res.data });
             })
             .catch(err => console.log('err getting batting data'));
+    }
+
+
+    findStats (year) {
+
+        // need body parser I think
+
+        const payload = {
+            hello: 'world'
+        }
+
+        Axios.post('/api/stats/battingLines', { body: payload })
+            .then(res => {
+
+                console.log('res?', res);
+            })
+            .catch(err => {
+
+                console.log('err?', err);
+            })
+
+        console.log('in find stats');
     }
 
 
@@ -137,14 +160,11 @@ class Home extends React.Component {
                         <tr>
                             {Object.keys(activePlayer[0]).map((header) => <td>{header}</td>)}
                         </tr>
-                    {activePlayer.map((year) => {
+                        {activePlayer.map((year) => {
 
-                    return (
-                        <tr>{Object.keys(year).map((stat) => {
-
-                        return <td>{year[stat]}</td>
-                    })}</tr>)
-                    })}</tbody>
+                            return <tr onClick={() => this.findStats(year)}>{Object.keys(year).map((stat) => <td>{year[stat]}</td> )}</tr>
+                        })}
+                    </tbody>
                 </table>}
             </div>
         )
