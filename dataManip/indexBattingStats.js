@@ -6,8 +6,10 @@ const BattingStats = Path.resolve(__dirname, './formattedBatting.csv');
 
 
 const stats = [
-    { name: 'hr', index: 9 },
-    { name: 'rbi', index: 10}
+    // { name: 'hr', index: 9 },
+    // { name: 'rbi', index: 10 },
+    // { name: 'sb', index: 11 },
+    // { name: 'h', index: 6 }
 ];
 
 

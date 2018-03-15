@@ -50,10 +50,6 @@ internals.findIndex = (statTotals, min, max) => {
 
 internals.getMatchingStats = (stat, min, max) => {
 
-    console.log('stat', stat);
-    console.log('min', min);
-    console.log('max', max);
-
     const file = Path.resolve(__dirname, `../data/indexed-${stat}.csv`);
     const raw = Fs.readFileSync(file, 'utf-8');
     const battingLines = raw.split('\n')
@@ -89,14 +85,18 @@ internals.getMatchingStats = (stat, min, max) => {
 
 module.exports = (req, res) => {
 
-    const start = Date.now()
+    // const payload = {
+    //     stats: {
+    //         hr: '40,100',
+    //         sb: '40,200'
+    //     }
+    // };
 
-    const payload = {
-        stats: {
-            hr: '50,60',
-            rbi: '100,200'
-        }
-    };
+    console.log('req', req);
+
+    const payload = req.body.payload;
+
+    console.log('pl?', payload);
 
     if (!payload.stats) {
         return res.status(400).send('Bad payload');
@@ -132,6 +132,8 @@ module.exports = (req, res) => {
         })
     })
 
+    console.log('count before filter', battingLines.length);
+
     let count = 0;
 
     const filteredLines = battingLines.filter((line) => {
@@ -156,6 +158,8 @@ module.exports = (req, res) => {
         }
         return false;
     })
+
+    console.log('res?', filteredLines);
 
 
     res.send(filteredLines);
