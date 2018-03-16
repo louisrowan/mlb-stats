@@ -92,13 +92,9 @@ module.exports = (req, res) => {
     //     }
     // };
 
-    console.log('req', req);
-
     const payload = req.body.payload;
 
-    console.log('pl?', payload);
-
-    if (!payload.stats) {
+    if (!payload) {
         return res.status(400).send('Bad payload');
     }
 
@@ -120,15 +116,21 @@ module.exports = (req, res) => {
 
         results.forEach((id) => {
 
-            const splitId = id.split('-');
-            const playerId = splitId[0];
-            const year = splitId[1];
+            try {
 
-            const index = Common.findBattingLineByIdYear(formattedBattingLines, playerId, year);
+                const splitId = id.split('-');
+                const playerId = splitId[0];
+                const year = splitId[1];
 
-            const player = Common.formatBattingData(formattedBattingLines[index]);
+                const index = Common.findBattingLineByIdYear(formattedBattingLines, playerId, year);
 
-            battingLines.push(player);
+                const player = Common.formatBattingData(formattedBattingLines[index]);
+
+                battingLines.push(player);
+            }
+            catch (err) {
+                console.log('missing data for', id);
+            } // skip bad data
         })
     })
 

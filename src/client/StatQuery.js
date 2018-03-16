@@ -3,7 +3,7 @@ const Axios = require('axios');
 
 const { Input } = require('semantic-ui-react');
 
-const stats = ['hr', 'rbi', 'sb', 'h'];
+const stats = ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'];
 
 const initialState = {};
 stats.forEach((stat) => {

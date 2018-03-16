@@ -10,6 +10,10 @@ const stats = [
     // { name: 'rbi', index: 10 },
     // { name: 'sb', index: 11 },
     // { name: 'h', index: 6 }
+    { name : 'avg', index: 17 },
+    { name : 'obp', index: 18 },
+    { name : 'slg', index: 19 },
+    { name : 'ops', index: 20 },
 ];
 
 
@@ -25,7 +29,7 @@ const createStatArray = (splitFile, statName, statIndex) => {
 
         const pair = {
             id: l[0] + "-" + l[1],
-            [statName] : l[statIndex]
+            [statName]: isNaN(l[statIndex]) ? 0 : l[statIndex]
         }
 
         unsortedArray.push(pair);
