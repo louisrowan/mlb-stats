@@ -1,5 +1,55 @@
 'use strict';
 
+const Fs = require('fs');
+const Path = require('path');
+
+const NamesCSV = Path.resolve(__dirname, './data/names.csv');
+
+
+
+const internals = {};
+
+internals.getIndexFromId = (namesArray, id) => {
+
+    const length = namesArray.length;
+
+    if (length === 1) {
+        if (namesArray[0][0] === id) {
+            console.log('found data for', id);
+            return 0;
+        }
+        else {
+            throw new Error('Id not found in Common.getIndexFromId:', id);
+        }
+    }
+
+    const midpoint = Math.floor(length / 2);
+
+    if (namesArray[midpoint][0] === id) {
+        console.log('found data for', id);
+        return midpoint;
+    }
+
+    if (namesArray[midpoint][0] > id) {
+        return internals.getIndexFromId(namesArray.slice(0, midpoint), id);
+    }
+    else {
+        return midpoint + internals.getIndexFromId(namesArray.slice(midpoint + 1, length), id);
+    }
+}
+
+
+
+
+const readNamesFile = () => {
+
+    const file = Fs.readFileSync(NamesCSV, 'utf-8').split('\n');
+    return file.map((line) => line.split(','));
+};
+
+
+
+
 const findBattingLineById = (array, id) => {
 
     const length = array.length;
@@ -55,10 +105,13 @@ const findBattingLineByIdYear = (battingLines, id, year) => {
     }
 }
 
-const formatBattingData = (data) => {
+const formatBattingData = (data, namesFile) => {
+
+    const id = data[0];
+    const index = internals.getIndexFromId(namesFile, id);
 
     const res = {};
-    res.id = data[0]
+    res.name = namesFile[index][3];
     res.year = data[1];
     res.teamId = data[2]
     res.g = +data[3];
@@ -80,12 +133,12 @@ const formatBattingData = (data) => {
     res.slg = +data[19];
     res.ops = +data[20];
 
-
     return res;
 }
 
 
 module.exports = {
+    readNamesFile,
     findBattingLineById,
     findBattingLineByIdYear,
     formatBattingData

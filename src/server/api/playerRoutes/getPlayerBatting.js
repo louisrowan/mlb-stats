@@ -36,7 +36,9 @@ module.exports = (req, res) => {
     const matchingStats = battingStatsArray.slice(startIndex + 1, endIndex);
 
     const splitMatchingStats = matchingStats.map((year) => year.split(','));
-    const formattedMatchingStats = splitMatchingStats.map((year) => Common.formatBattingData(year));
+
+    const namesFile = Common.readNamesFile();
+    const formattedMatchingStats = splitMatchingStats.map((year) => Common.formatBattingData(year, namesFile));
 
     res.send(formattedMatchingStats);
 };

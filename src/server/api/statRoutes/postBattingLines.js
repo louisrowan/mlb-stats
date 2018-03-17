@@ -118,11 +118,13 @@ module.exports = (req, res) => {
 
                 const index = Common.findBattingLineByIdYear(formattedBattingLines, playerId, year);
 
-                const player = Common.formatBattingData(formattedBattingLines[index]);
+                const namesFile = Common.readNamesFile();
+                const player = Common.formatBattingData(formattedBattingLines[index], namesFile);
 
                 if (player.ab >= minAb) battingLines.push(player);
             }
             catch (err) {
+                console.log('err', err);
                 console.log('missing data for', id);
             } // skip bad data
         })
@@ -152,9 +154,6 @@ module.exports = (req, res) => {
         }
         return false;
     })
-
-    console.log('res?', filteredLines);
-
 
     res.send(filteredLines);
 };
