@@ -1,6 +1,16 @@
 const React = require('react');
 const Axios = require('axios');
 
+const {
+    Button,
+    Container,
+    Input,
+    List,
+} = require ('semantic-ui-react');
+
+
+const BattingStatsTable = require('./BattingStatsTable');
+
 
 const PlayerListItem = (props) => {
 
@@ -13,14 +23,11 @@ const PlayerListItem = (props) => {
     const { handleActivePlayerChange} = props;
 
     return (
-        <li >
-            <button onClick={() => handleActivePlayerChange(id)}>
-                {fullName}
-            </button>
-            <span>
-                | {teams.map((t) => <span>{`${t.abbreviation} `}</span>)}
-            </span>
-        </li>
+        <List.Item>
+            <Button onClick={() => handleActivePlayerChange(id)}>
+                {fullName} | {teams.map((t) => <span>{`${t.abbreviation} `}</span>)}
+            </Button>
+        </List.Item>
     )
 }
 
@@ -49,7 +56,6 @@ class Home extends React.Component {
 
         this.handleSearchTermChange = this.handleSearchTermChange.bind(this);
         this.handleActivePlayerChange = this.handleActivePlayerChange.bind(this);
-        this.findStats = this.findStats.bind(this);
     }
 
 
@@ -62,7 +68,6 @@ class Home extends React.Component {
 
     handleActivePlayerChange (playerId) {
 
-
         Axios.get('/api/players/' + playerId + '/batting')
             .then(res => {
 
@@ -72,29 +77,6 @@ class Home extends React.Component {
             })
             .catch(err => console.log('err getting batting data'));
     }
-
-
-    findStats (year) {
-
-        // need body parser I think
-
-        const payload = {
-            hello: 'world'
-        }
-
-        Axios.post('/api/stats/battingLines', { body: payload })
-            .then(res => {
-
-                console.log('res?', res);
-            })
-            .catch(err => {
-
-                console.log('err?', err);
-            })
-
-        console.log('in find stats');
-    }
-
 
 
     render () {
@@ -151,22 +133,16 @@ class Home extends React.Component {
 
 
         return (
-            <div>
-            <input value={searchTerm} onChange={this.handleSearchTermChange} />
-            { players.length > 0 && searchTerm.length > 2 && filter }
-            { activePlayer.length > 0 &&
-                <table>
-                    <tbody>
-                        <tr>
-                            {Object.keys(activePlayer[0]).map((header) => <td>{header}</td>)}
-                        </tr>
-                        {activePlayer.map((year) => {
-
-                            return <tr onClick={() => this.findStats(year)}>{Object.keys(year).map((stat) => <td>{year[stat]}</td> )}</tr>
-                        })}
-                    </tbody>
-                </table>}
-            </div>
+            <Container>
+            <Input
+                value={searchTerm}
+                onChange={this.handleSearchTermChange}
+                placeholder='Search for a player, team or position'
+                fluid
+                />
+            { players.length > 0 && searchTerm.length > 2 && <List>{filter}</List> }
+            { activePlayer.length > 0 && <BattingStatsTable statlineArray={activePlayer} /> }
+            </Container>
         )
 
     }

@@ -6,6 +6,7 @@ const {
     BrowserRouter
 } = require('react-router-dom');
 
+const NavBar = require('./NavBar');
 const Home = require('./Home');
 const StatQuery = require('./StatQuery');
 
@@ -15,10 +16,7 @@ const App = () => {
         <BrowserRouter>
             <Route to='/'>
             <div>
-                <div>
-                    <Link to='/query'>Query</Link>
-                    <Link to='/home'>Home</Link>
-                </div>
+                <NavBar />
                 <Route path='/query' component={StatQuery} />
                 <Route path='/home' component={Home} />
             </div>
