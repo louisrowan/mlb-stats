@@ -6,14 +6,14 @@ const BattingStats = Path.resolve(__dirname, './formattedBatting.csv');
 
 
 const stats = [
-    // { name: 'hr', index: 9 },
-    // { name: 'rbi', index: 10 },
-    // { name: 'sb', index: 11 },
-    // { name: 'h', index: 6 }
-    // { name : 'avg', index: 17 },
-    // { name : 'obp', index: 18 },
-    // { name : 'slg', index: 19 },
-    // { name : 'ops', index: 20 },
+    { name: 'hr', index: 9 },
+    { name: 'rbi', index: 10 },
+    { name: 'sb', index: 11 },
+    { name: 'h', index: 6 },
+    { name : 'avg', index: 17 },
+    { name : 'obp', index: 18 },
+    { name : 'slg', index: 19 },
+    { name : 'ops', index: 20 }
 ];
 
 
@@ -27,12 +27,13 @@ const createStatArray = (splitFile, statName, statIndex) => {
 
         const l = line.split(',');
 
-        const pair = {
+        const serializedData = {
             id: l[0] + "-" + l[1],
-            [statName]: isNaN(l[statIndex]) ? 0 : l[statIndex]
+            [statName]: isNaN(l[statIndex]) ? 0 : l[statIndex],
+            ab: l[4] || 0
         }
 
-        unsortedArray.push(pair);
+        unsortedArray.push(serializedData);
     });
 
     return {
@@ -67,7 +68,7 @@ results.forEach((result) => {
 
     sortedArray.forEach((obj) => {
 
-        const str = `${obj[statName]},${obj.id}\n`;
+        const str = `${obj[statName]},${obj.id},${obj.ab}\n`;
         file += str;
     });
 

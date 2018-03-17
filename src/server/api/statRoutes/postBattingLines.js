@@ -48,9 +48,9 @@ internals.findIndex = (statTotals, min, max) => {
 }
 
 
-internals.getMatchingStats = (stat, min, max) => {
+internals.getMatchingStats = (stat, min, max, minAb) => {
 
-    const file = Path.resolve(__dirname, `../data/indexed-${stat}.csv`);
+    const file = Path.resolve(__dirname, `../data/indexedStats/indexed-${stat}.csv`);
     const raw = Fs.readFileSync(file, 'utf-8');
     const battingLines = raw.split('\n')
 
@@ -75,8 +75,8 @@ internals.getMatchingStats = (stat, min, max) => {
         }
 
         const results = battingLines.slice(beginIndex + 1, endIndex);
-
-        const ids = results.map((result) => result.split(',')[1]);
+        const filteredResults = results.filter((result) => result.split(',')[2] >= minAb);
+        const ids = filteredResults.map((result) => result.split(',')[1]);
         return ids;
     }
     return [];
@@ -91,69 +91,104 @@ module.exports = (req, res) => {
         return res.status(400).send('Bad payload');
     }
 
+    console.log('');
+    const start = Date.now()
+    console.log('request received to post batting Lines:', payload);
+
+
+    // format payload
     const stats = payload.stats;
     const minAb = payload.minAb;
-
     const battingLines = [];
+    const namesFile = Common.readNamesFile();
 
 
+    // read in batting lines file for later use
     const rawBattingLinesFile = Fs.readFileSync(BattingLinesFile, 'utf-8').split('\n');
     const formattedBattingLines = rawBattingLinesFile.map((line) => line.split(','));
 
+
+
+    // prepare stat params
+    const firstStat = {};
+    const additionalMatches = [];
+    let minCount;
+    let minStat = '';
     Object.keys(stats).forEach((stat) => {
 
         const splitStats = stats[stat].split(',');
         const min = +splitStats[0];
         const max = +splitStats[1];
 
-        const results = internals.getMatchingStats(stat, min, max);
+        const results = internals.getMatchingStats(stat, min, max, minAb);
+        const count = results.length;
 
-        results.forEach((id) => {
-
-            try {
-
-                const splitId = id.split('-');
-                const playerId = splitId[0];
-                const year = splitId[1];
-
-                const index = Common.findBattingLineByIdYear(formattedBattingLines, playerId, year);
-
-                const namesFile = Common.readNamesFile();
-                const player = Common.formatBattingData(formattedBattingLines[index], namesFile);
-
-                if (player.ab >= minAb) battingLines.push(player);
-            }
-            catch (err) {
-                console.log('err', err);
-                console.log('missing data for', id);
-            } // skip bad data
-        })
+        if (!minCount || count < minCount) {
+            minCount = count;
+            minStat = stat;
+        }
     });
 
-    let count = 0;
+    Object.keys(stats).forEach((stat) => {
 
-    const filteredLines = battingLines.filter((line) => {
-
-        if (count > 99) { return false; };
-
-        let match = true;
-
-        Object.keys(stats).forEach((stat) => {
-
-            const splitStats = stats[stat].split(',');
-            const min = +splitStats[0];
-            const max = +splitStats[1];
-
-            if (+line[stat] < min || +line[stat] > max) {
-                match = false;
-            }
-        })
-        if (match) {
-            ++count
-            return true;
+        if (stat === minStat) {
+            firstStat.stat = stat;
+            firstStat.params = stats[stat];
         }
-        return false;
+        else {
+            additionalMatches.push({
+                stat: stat,
+                params: stats[stat]
+            });
+        }
     })
 
-    res.send(filteredLines);
+    // get stats for first stat
+    const splitStats = firstStat.params.split(',');
+    const min = +splitStats[0];
+    const max = +splitStats[1];
+    const results = internals.getMatchingStats(firstStat.stat, min, max, minAb);
+
+    // loop thru each match for first stat
+    let count = 0;
+    results.forEach((id) => {
+
+        if (count > 99) return; // max 100 results for now
+
+        try {
+
+            const splitId = id.split('-');
+            const playerId = splitId[0];
+            const year = splitId[1];
+
+            // find batting line index and locate correct batting line
+            const index = Common.findBattingLineByIdYear(formattedBattingLines, playerId, year);
+            const player = Common.formatBattingData(formattedBattingLines[index], namesFile);
+
+            // loop thru additional stats in payload to see if they are also a match
+            let matchesAll = true;
+            additionalMatches.forEach((match) => {
+
+                const splitStats = match.params.split(',');
+                const min = +splitStats[0];
+                const max = +splitStats[1];
+
+                if (player[match.stat] < min || player[match.stat] > max) {
+                    matchesAll = false;
+                }
+            })
+
+            if (matchesAll) {
+                ++count
+                battingLines.push(player)
+            };
+        }
+        catch (err) {
+            console.log('error in post batting data', id, err);
+        }
+    });
+
+    console.log('total time:', Date.now() - start);
+
+    res.send(battingLines);
 };

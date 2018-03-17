@@ -10,10 +10,8 @@ const Common = require('../common');
 
 module.exports = (req, res) => {
 
-    const start = Date.now();
-
     const playerId = req.params.id;
-    const years = [];
+    const namesFile = Common.readNamesFile();
     
     const raw = Fs.readFileSync(Path.resolve(__dirname, BattingData))
     const stringified = raw.toString();
@@ -37,7 +35,6 @@ module.exports = (req, res) => {
 
     const splitMatchingStats = matchingStats.map((year) => year.split(','));
 
-    const namesFile = Common.readNamesFile();
     const formattedMatchingStats = splitMatchingStats.map((year) => Common.formatBattingData(year, namesFile));
 
     res.send(formattedMatchingStats);
