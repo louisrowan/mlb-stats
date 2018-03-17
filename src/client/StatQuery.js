@@ -47,14 +47,6 @@ class StatQuery extends React.Component {
 
     handleChange (type, stat, value) {
 
-        if (+value) {
-            value = +value;
-        }
-        else {
-            console.log('ret', value);
-            return;
-        }
-
         const state = { ...this.state }
 
         state.stats[stat][type] = value;
@@ -75,8 +67,14 @@ class StatQuery extends React.Component {
 
         Object.keys(stats).forEach((stat) => {
 
+            const active = stats[stat].active;
+
+            if (!active) {
+                return;
+            }
+
             const min = stats[stat].min;
-            const max = stats[stat].max;
+            const max = +stats[stat].max ? stats[stat].max : 99999;
 
             if (+max > 0) {
 
@@ -127,7 +125,7 @@ class StatQuery extends React.Component {
 
             if (stat.active) {
                 anyActive = true;
-                if (!stat.min || !stat.max) {
+                if (!stat.min) {
                     missingVal = true;
                 }
             }
@@ -208,16 +206,16 @@ class StatQuery extends React.Component {
                                     <Input
                                         onChange={(e) => this.handleChange('min', s, e.target.value)}
                                         type='number'
-                                        min='0'
+                                        min={0}
                                         value={min}
                                     />
                                 </Table.Cell>
                                 <Table.Cell>
                                     <Input
                                         onChange={(e) => this.handleChange('max', s, e.target.value)}
-                                        type='number'
-                                        min='0'
-                                        value={max}
+                                        type={+max ? 'number' : 'text'}
+                                        min={0}
+                                        value={+max ? max : 'N/A'}
                                         />
                                 </Table.Cell>
                             </Table.Row>

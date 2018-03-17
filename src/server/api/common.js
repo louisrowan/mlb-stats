@@ -15,7 +15,6 @@ internals.getIndexFromId = (namesArray, id) => {
 
     if (length === 1) {
         if (namesArray[0][0] === id) {
-            console.log('found data for', id);
             return 0;
         }
         else {
@@ -26,7 +25,6 @@ internals.getIndexFromId = (namesArray, id) => {
     const midpoint = Math.floor(length / 2);
 
     if (namesArray[midpoint][0] === id) {
-        console.log('found data for', id);
         return midpoint;
     }
 
@@ -34,7 +32,7 @@ internals.getIndexFromId = (namesArray, id) => {
         return internals.getIndexFromId(namesArray.slice(0, midpoint), id);
     }
     else {
-        return midpoint + internals.getIndexFromId(namesArray.slice(midpoint + 1, length), id);
+        return midpoint + internals.getIndexFromId(namesArray.slice(midpoint, length), id);
     }
 }
 
