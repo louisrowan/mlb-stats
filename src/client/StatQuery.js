@@ -1,14 +1,21 @@
 const React = require('react');
 const Axios = require('axios');
 
-const { Input } = require('semantic-ui-react');
+const {
+    Button,
+    Container,
+    Input,
+    Loader,
+    Table,
+    Segment
+ } = require('semantic-ui-react');
 
-const stats = ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'];
+const staticStats = ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'];
 
 const initialState = {};
-stats.forEach((stat) => {
+staticStats.forEach((stat) => {
 
-    initialState[stat] = { min: 0, max: 0}
+    initialState[stat] = { min: 0, max: 0, active: false }
 })
 
 class StatQuery extends React.Component {
@@ -18,11 +25,14 @@ class StatQuery extends React.Component {
 
         this.state = {
             stats: initialState,
-            response: {}
+            response: {},
+            loading: false
         }
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleCheck = this.handleCheck.bind(this);
+        this.handleRowClick = this.handleRowClick.bind(this);
     };
 
     handleChange (type, stat, value) {
@@ -64,49 +74,134 @@ class StatQuery extends React.Component {
             }
         })
 
-        console.log('sendingpl', payload);
+        this.setState({ loading: true });
 
         Axios.post('/api/stats/battingLines', { payload })
             .then(res => {
 
                 console.log('res?', res);
 
-                this.setState({ response: res.data })
+                this.setState({ response: res.data, loading: false });
             })
             .then(err => {
+
+                this.setState({ loading: false });
 
                 console.log('err?', err);
             })
     }
 
+
+    handleCheck (stat, event) {
+
+        const stats = { ...this.state.stats }
+
+        stats[stat].active = !stats[stat].active;
+
+        this.setState({
+            stats
+        });
+    }
+
+
+    handleRowClick (stat) {
+
+        const stats = { ...this.state.stats };
+
+        stats[stat].active = 'active';
+
+        this.setState({
+            stats
+        });
+    }
+
+
+    isButtonEnabled () {
+
+        const { stats } = this.state;
+
+        let anyActive = false;
+        let missingVal = false;
+
+        Object.keys(stats).forEach((s) => {
+
+            const stat = stats[s];
+
+            if (stat.active) {
+                anyActive = true;
+                if (!stat.min || !stat.max) {
+                    missingVal = true;
+                }
+            }
+        })
+
+        if (!anyActive || missingVal) {
+            return false;
+        }
+        return true;
+    }
+
     render() {
 
-        console.log('state is', this.state);
+        const { loading, stats } = this.state;
 
         return (
-            <div>
-                <table>
-                    <tbody>
-                    <tr>
-                        <td></td>
-                        <td>Min</td>
-                        <td>Max</td>
-                    </tr>
-                        {stats.map((s) => {
+            <Container fluid>
+                <Table collapsing>
+                    <Table.Body>
+                    <Table.Row>
+                        <Table.Cell></Table.Cell>
+                        <Table.Cell>Min</Table.Cell>
+                        <Table.Cell>Max</Table.Cell>
+                        <Table.Cell>Active</Table.Cell>
+                    </Table.Row>
+                        {Object.keys(stats).map((s) => {
+
+                            const active = stats[s].active;
 
                             return (
-                            <tr>
-                                <td>{s}</td>
-                                <td><Input onChange={(e) => this.handleChange('min', s, e.target.value)}/></td>
-                                <td><Input onChange={(e) => this.handleChange('max', s, e.target.value)}/></td>
-                            </tr>
+                            <Table.Row
+                                positive={active}
+                                negative={!active}
+                                onClick={() => this.handleRowClick(s)}
+                            >
+                                <Table.Cell>
+                                    {s}
+                                </Table.Cell>
+                                <Table.Cell>
+                                    <Input
+                                        disabled={!active}
+                                        onChange={(e) => this.handleChange('min', s, e.target.value)}
+                                        type='number'
+                                        min='0'
+                                    />
+                                </Table.Cell>
+                                <Table.Cell>
+                                    <Input
+                                        disabled={!active}
+                                        onChange={(e) => this.handleChange('max', s, e.target.value)}
+                                        type='number'
+                                        min='0'
+                                        />
+                                </Table.Cell>
+                                <Table.Cell>
+                                    <Input
+                                        type='checkbox'
+                                        checked={active}
+                                        onChange={(e) => this.handleCheck(s, e)}
+                                    />
+                                </Table.Cell>
+                            </Table.Row>
                             )
                         })}
-                    </tbody>
-                </table>
-                <button onClick={() => this.handleSubmit()}>Submit</button>
+                    </Table.Body>
+                </Table>
+                <Button 
+                disabled={!this.isButtonEnabled()}
+                onClick={() => this.handleSubmit()}>Submit</Button>
+                { loading && <Segment><Loader active /></Segment>}
                 <pre>{JSON.stringify(this.state.response, null, 2)}</pre>
-            </div>
+            </Container>
         )
     }
 }

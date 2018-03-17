@@ -15,7 +15,7 @@ app.use(BodyParser.json());
 app.use('/api', Api);
 
 
-app.get('/', (req, res) => {
+app.get('/*', (req, res) => {
   res.sendFile(Path.resolve(__dirname, '../../dist/index.html'));
 });
 

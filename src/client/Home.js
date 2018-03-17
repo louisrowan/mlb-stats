@@ -1,8 +1,6 @@
 const React = require('react');
 const Axios = require('axios');
 
-const StatQuery = require('./StatQuery');
-
 
 const PlayerListItem = (props) => {
 
@@ -168,7 +166,6 @@ class Home extends React.Component {
                         })}
                     </tbody>
                 </table>}
-                <StatQuery />
             </div>
         )
 
