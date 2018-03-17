@@ -85,13 +85,6 @@ internals.getMatchingStats = (stat, min, max) => {
 
 module.exports = (req, res) => {
 
-    // const payload = {
-    //     stats: {
-    //         hr: '40,100',
-    //         sb: '40,200'
-    //     }
-    // };
-
     const payload = req.body.payload;
 
     if (!payload) {
@@ -99,6 +92,7 @@ module.exports = (req, res) => {
     }
 
     const stats = payload.stats;
+    const minAb = payload.minAb;
 
     const battingLines = [];
 
@@ -124,17 +118,17 @@ module.exports = (req, res) => {
 
                 const index = Common.findBattingLineByIdYear(formattedBattingLines, playerId, year);
 
-                const player = Common.formatBattingData(formattedBattingLines[index]);
+                const namesFile = Common.readNamesFile();
+                const player = Common.formatBattingData(formattedBattingLines[index], namesFile);
 
-                battingLines.push(player);
+                if (player.ab >= minAb) battingLines.push(player);
             }
             catch (err) {
+                console.log('err', err);
                 console.log('missing data for', id);
             } // skip bad data
         })
-    })
-
-    console.log('count before filter', battingLines.length);
+    });
 
     let count = 0;
 
@@ -160,9 +154,6 @@ module.exports = (req, res) => {
         }
         return false;
     })
-
-    console.log('res?', filteredLines);
-
 
     res.send(filteredLines);
 };

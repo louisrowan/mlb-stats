@@ -1,14 +1,26 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-const { Route, BrowserRouter } = require('react-router-dom');
+const {
+    Link,
+    Route,
+    BrowserRouter
+} = require('react-router-dom');
 
+const NavBar = require('./NavBar');
 const Home = require('./Home');
+const StatQuery = require('./StatQuery');
 
 const App = () => {
 
     return (
         <BrowserRouter>
-            <Route path='/' component={Home} />
+            <Route to='/'>
+            <div>
+                <NavBar />
+                <Route path='/query' component={StatQuery} />
+                <Route path='/home' component={Home} />
+            </div>
+            </Route>
         </BrowserRouter>
     )
 }
