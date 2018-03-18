@@ -19,15 +19,15 @@ class BattingStatsTable extends React.Component {
             <Table>
                 <Table.Body>
                     <Table.Row>
-                        {Object.keys(statlineArray[0]).map((header) => <Table.Cell>{header}</Table.Cell>)}
+                        {Object.keys(statlineArray[0]).map((header) => <Table.Cell key={header}>{header}</Table.Cell>)}
                     </Table.Row>
-                    {statlineArray.map((year) => {
+                    {statlineArray.map((year, index) => {
 
                         return (
-                            <Table.Row>
+                            <Table.Row key={index}>
                                 {Object.keys(year).map((stat) => {
 
-                                    return <Table.Cell>{year[stat]}</Table.Cell>
+                                    return <Table.Cell key={stat}>{year[stat]}</Table.Cell>
                                 })}
                             </Table.Row>
                         )
