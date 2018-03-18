@@ -6,6 +6,7 @@ const {
     Button,
     Checkbox,
     Container,
+    Header,
     Input,
     List,
     Loader,
@@ -27,6 +28,8 @@ staticStats.forEach((stat) => {
     initialState.stats[stat] = { min: '', max: '', active: false }
 });
 initialState.minAb = 100;
+initialState.minYear = 1891;
+initialState.maxYear = 2006;
 
 class StatQuery extends React.Component {
 
@@ -35,35 +38,52 @@ class StatQuery extends React.Component {
 
         this.state = {
             ..._.cloneDeep(initialState),
-            response: {},
+            battingLinesArray: [],
+            hasData: false,
             loading: false
         }
 
-        this.handleChange = this.handleChange.bind(this);
+        this.handleUpdateStatMinMax = this.handleUpdateStatMinMax.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleCheck = this.handleCheck.bind(this);
+        this.handleCheckboxClick = this.handleCheckboxClick.bind(this);
         this.handleReset = this.handleReset.bind(this);
     };
 
-    handleChange (type, stat, value) {
 
-        const state = { ...this.state }
+    handleCheckboxClick (stat, event) {
+
+        const stats = { ...this.state.stats }
+
+        stats[stat].active = !stats[stat].active;
+
+        this.setState({
+            stats
+        });
+    };
+
+
+    handleUpdateStatMinMax (type, stat, value) {
+
+        const state = { ...this.state };
 
         state.stats[stat][type] = value;
 
         this.setState({
             stats: state.stats
-        })
-    }
+        });
+    };
+
 
     handleSubmit () {
 
-        const { minAb, stats } = this.state;
+        const { minAb, minYear, maxYear, stats } = this.state;
 
         const payload = {
             stats: {},
-            minAb
-        }
+            minAb,
+            minYear,
+            maxYear
+        };
 
         Object.keys(stats).forEach((stat) => {
 
@@ -76,40 +96,39 @@ class StatQuery extends React.Component {
             const min = stats[stat].min;
             const max = +stats[stat].max ? stats[stat].max : 99999;
 
-            if (+max > 0) {
+            if (max > 0) {
 
                 const qs = `${min},${max}`;
                 payload.stats[stat] = qs;
             }
         })
 
-        this.setState({ loading: true });
+        this.setState({
+            loading: true
+        });
 
         Axios.post('/api/stats/battingLines', { payload })
             .then(res => {
 
-                this.setState({ response: res.data, loading: false });
+                console.log('data?', res.data);
+
+                this.setState({
+                    hasData: true,
+                    battingLinesArray: res.data,
+                    loading: false
+                });
             })
-            .then(err => {
+            .catch(err => {
 
-                this.setState({ loading: false });
+                this.setState({
+                    hasData: false,
+                    loading: false,
+                    battingLinesArray: []
+                });
 
-                console.log('err?', err);
-            })
+                console.error('err?', err);
+            });
     }
-
-
-    handleCheck (stat, event) {
-
-        const stats = { ...this.state.stats }
-
-        stats[stat].active = !stats[stat].active;
-
-        this.setState({
-            stats
-        });
-    }
-
 
 
     isButtonEnabled () {
@@ -145,7 +164,15 @@ class StatQuery extends React.Component {
 
     render() {
 
-        const { loading, minAb, stats, response } = this.state;
+        const {
+            hasData,
+            loading,
+            minAb,
+            minYear,
+            maxYear,
+            stats,
+            battingLinesArray
+        } = this.state;
 
         return (
             <Container fluid>
@@ -159,7 +186,7 @@ class StatQuery extends React.Component {
                                 <List.Item key={s}>
                                     <Checkbox
                                         checked={active}
-                                        onChange={(e) => this.handleCheck(s, e)}
+                                        onChange={(e) => this.handleCheckboxClick(s, e)}
                                         label={s}
                                     />
                                 </List.Item>
@@ -186,6 +213,27 @@ class StatQuery extends React.Component {
                         </Table.Cell>
                         <Table.Cell>N/A</Table.Cell>
                     </Table.Row>
+                    <Table.Row>
+                        <Table.Cell>Years</Table.Cell>
+                        <Table.Cell>
+                            <Input
+                                onChange={(e) => this.setState({ minYear: e.target.value })}
+                                type='number'
+                                value={minYear}
+                                min={1891}
+                                max={2016}
+                            />
+                        </Table.Cell>
+                        <Table.Cell>
+                            <Input
+                                onChange={(e) => this.setState({ maxYear: e.target.value })}
+                                type='number'
+                                value={maxYear}
+                                min={1891}
+                                max={2016}
+                            />
+                        </Table.Cell>
+                    </Table.Row>
                         {Object.keys(stats).map((s) => {
 
                             const active = stats[s].active;
@@ -204,7 +252,7 @@ class StatQuery extends React.Component {
                                 </Table.Cell>
                                 <Table.Cell>
                                     <Input
-                                        onChange={(e) => this.handleChange('min', s, e.target.value)}
+                                        onChange={(e) => this.handleUpdateStatMinMax('min', s, e.target.value)}
                                         type='number'
                                         min={0}
                                         value={min}
@@ -212,7 +260,7 @@ class StatQuery extends React.Component {
                                 </Table.Cell>
                                 <Table.Cell>
                                     <Input
-                                        onChange={(e) => this.handleChange('max', s, e.target.value)}
+                                        onChange={(e) => this.handleUpdateStatMinMax('max', s, e.target.value)}
                                         type={+max ? 'number' : 'text'}
                                         min={0}
                                         value={+max ? max : 'N/A'}
@@ -230,8 +278,17 @@ class StatQuery extends React.Component {
                     Submit
                 </Button>
                 <Button onClick={() => this.handleReset()} content='Reset' />
-                { loading && <Segment><Loader active /></Segment>}
-                { response.length > 0 && <BattingStatsTable statlineArray={response} />}
+            { loading &&
+                <Segment><Loader active /></Segment>
+            }
+            { hasData && 
+                <Container>
+                    <Header as='h4' content={`Your search contained ${battingLinesArray.length} result${battingLinesArray.length === 1 ? '' : 's'}`} />
+                { battingLinesArray.length > 0 &&
+                    <BattingStatsTable statlineArray={battingLinesArray} />
+                }
+                </Container>
+            }
             </Container>
         )
     }

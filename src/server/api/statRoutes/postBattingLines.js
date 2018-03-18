@@ -48,7 +48,7 @@ internals.findIndex = (statTotals, min, max) => {
 }
 
 
-internals.getMatchingStats = (stat, min, max, minAb) => {
+internals.getMatchingStats = (stat, min, max, minAb, minYear, maxYear) => {
 
     const file = Path.resolve(__dirname, `../data/indexedStats/indexed-${stat}.csv`);
     const raw = Fs.readFileSync(file, 'utf-8');
@@ -75,7 +75,24 @@ internals.getMatchingStats = (stat, min, max, minAb) => {
         }
 
         const results = battingLines.slice(beginIndex + 1, endIndex);
-        const filteredResults = results.filter((result) => result.split(',')[2] >= minAb);
+        const filteredResults = results.filter((result) => {
+
+            const splitResult = result.split(',');
+            const ab = +splitResult[2];
+
+            let year;
+            try {
+                year = +splitResult[1].split('-')[1];
+            }
+            catch (err) {} // handle undefined
+
+            if (ab >= minAb &&
+                year >= minYear &&
+                year <= maxYear) {
+                return true;
+            }
+            return false;
+        });
         const ids = filteredResults.map((result) => result.split(',')[1]);
         return ids;
     }
@@ -98,7 +115,9 @@ module.exports = (req, res) => {
 
     // format payload
     const stats = payload.stats;
-    const minAb = payload.minAb;
+    const minAb = +payload.minAb;
+    const minYear = +payload.minYear;
+    const maxYear = +payload.maxYear;
     const battingLines = [];
     const namesFile = Common.readNamesFile();
 
@@ -147,7 +166,7 @@ module.exports = (req, res) => {
     const splitStats = firstStat.params.split(',');
     const min = +splitStats[0];
     const max = +splitStats[1];
-    const results = internals.getMatchingStats(firstStat.stat, min, max, minAb);
+    const results = internals.getMatchingStats(firstStat.stat, min, max, minAb, minYear, maxYear);
 
     // loop thru each match for first stat
     let count = 0;
