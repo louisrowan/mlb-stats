@@ -1,25 +1,35 @@
 const React = require('react');
 
+const { connect } = require('react-redux');
+const { bindActionCreators } = require('redux')
+const { statquerySortBattingStats } = require('./redux/modules/statQuery');
+
 const { Table } = require('semantic-ui-react');
 
 
 class BattingStatsTable extends React.Component {
 
     constructor (props) {
-        super (props);
 
+        super (props);
     }
 
 
     render () {
 
-        const { statlineArray } = this.props;
+        const {
+            statlineArray,
+            statquerySortBattingStats
+        } = this.props;
 
         return (
             <Table>
                 <Table.Body>
                     <Table.Row>
-                        {Object.keys(statlineArray[0]).map((header) => <Table.Cell key={header}>{header}</Table.Cell>)}
+                        {Object.keys(statlineArray[0]).map((header) => <Table.Cell
+                            key={header}
+                            onClick={() => statquerySortBattingStats(header, 'positive')}
+                            >{header}</Table.Cell>)}
                     </Table.Row>
                     {statlineArray.map((year, index) => {
 
@@ -36,6 +46,19 @@ class BattingStatsTable extends React.Component {
             </Table>
         )
     }
+};
+
+const mapStateToProps = state => {
+    return {
+        statlineArray: state.statQuery.battingLinesArray
+    }
 }
 
-module.exports = BattingStatsTable;
+const mapDispatchToProps = dispatch => {
+
+    return bindActionCreators({
+        statquerySortBattingStats
+    }, dispatch);
+}
+
+module.exports = connect(mapStateToProps, mapDispatchToProps)(BattingStatsTable);
