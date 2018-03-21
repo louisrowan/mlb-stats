@@ -2,6 +2,20 @@ const React = require('react');
 const Axios = require('axios');
 const _ = require('lodash');
 
+const { connect } = require('react-redux');
+const { bindActionCreators } = require('redux')
+const {
+    statqueryUpdateLoading,
+    statqueryFetchBattingLinesSuccess,
+    statqueryFetchBattingLinesFailure,
+    statqueryUpdateMinAb,
+    statqueryUpdateMinYear,
+    statqueryUpdateMaxYear,
+    statqueryToggleStatActive,
+    statqueryUpdateStatValue,
+    statqueryReset
+} = require('./redux/modules/statQuery');
+
 const {
     Button,
     Checkbox,
@@ -14,69 +28,21 @@ const {
     Segment
  } = require('semantic-ui-react');
 
-
 const BattingStatsTable = require('./BattingStatsTable');
 
 
-const staticStats = ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'];
-
-const initialState = {
-    stats: {}
-};
-staticStats.forEach((stat) => {
-
-    initialState.stats[stat] = { min: '', max: '', active: false }
-});
-initialState.minAb = 100;
-initialState.minYear = 1891;
-initialState.maxYear = 2006;
 
 class StatQuery extends React.Component {
 
-    constructor(props) {
-        super(props);
+    constructor (props) {
 
-        this.state = {
-            ..._.cloneDeep(initialState),
-            battingLinesArray: [],
-            hasData: false,
-            loading: false
-        }
-
-        this.handleUpdateStatMinMax = this.handleUpdateStatMinMax.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleCheckboxClick = this.handleCheckboxClick.bind(this);
-        this.handleReset = this.handleReset.bind(this);
+        super (props);
     };
 
 
-    handleCheckboxClick (stat, event) {
+    createPayload = () => {
 
-        const stats = { ...this.state.stats }
-
-        stats[stat].active = !stats[stat].active;
-
-        this.setState({
-            stats
-        });
-    };
-
-
-    handleUpdateStatMinMax (type, stat, value) {
-
-        const state = { ...this.state };
-
-        state.stats[stat][type] = value;
-
-        this.setState({
-            stats: state.stats
-        });
-    };
-
-
-    handleSubmit () {
-
-        const { minAb, minYear, maxYear, stats } = this.state;
+        const { minAb, minYear, maxYear, stats } = this.props;
 
         const payload = {
             stats: {},
@@ -102,38 +68,30 @@ class StatQuery extends React.Component {
                 payload.stats[stat] = qs;
             }
         })
+        return payload;
+    };
 
-        this.setState({
-            loading: true
-        });
 
+    handleSubmit = () => {
+
+        const payload = this.createPayload();
+
+        this.props.statqueryUpdateLoading(true);
         Axios.post('/api/stats/battingLines', { payload })
             .then(res => {
 
-                console.log('data?', res.data);
-
-                this.setState({
-                    hasData: true,
-                    battingLinesArray: res.data,
-                    loading: false
-                });
+                this.props.statqueryFetchBattingLinesSuccess(res.data);
             })
             .catch(err => {
 
-                this.setState({
-                    hasData: false,
-                    loading: false,
-                    battingLinesArray: []
-                });
-
-                console.error('err?', err);
+                this.props.statqueryFetchBattingLinesFailure();
             });
-    }
+    };
 
 
-    isButtonEnabled () {
+    isButtonEnabled = () => {
 
-        const { stats } = this.state;
+        const { stats } = this.props;
 
         let anyActive = false;
         let missingVal = false;
@@ -154,25 +112,26 @@ class StatQuery extends React.Component {
             return false;
         }
         return true;
-    }
+    };
 
 
-    handleReset () {
-
-        this.setState({ ...this.state, ..._.cloneDeep(initialState) });
-    }
-
-    render() {
+    render = () => {
 
         const {
+            battingLinesArray,
             hasData,
             loading,
             minAb,
             minYear,
             maxYear,
             stats,
-            battingLinesArray
-        } = this.state;
+            statqueryUpdateMinAb,
+            statqueryUpdateMinYear,
+            statqueryUpdateMaxYear,
+            statqueryToggleStatActive,
+            statqueryUpdateStatValue,
+            statqueryReset
+        } = this.props;
 
         return (
             <Container fluid>
@@ -186,7 +145,7 @@ class StatQuery extends React.Component {
                                 <List.Item key={s}>
                                     <Checkbox
                                         checked={active}
-                                        onChange={(e) => this.handleCheckboxClick(s, e)}
+                                        onChange={() => statqueryToggleStatActive(s)}
                                         label={s}
                                     />
                                 </List.Item>
@@ -205,7 +164,7 @@ class StatQuery extends React.Component {
                         <Table.Cell>ab</Table.Cell>
                         <Table.Cell>
                             <Input
-                                onChange={(e) => this.setState({ minAb: e.target.value })}
+                                onChange={(e) => statqueryUpdateMinAb(e.target.value)}
                                 type='number'
                                 value={minAb}
                                 min={1}
@@ -217,7 +176,7 @@ class StatQuery extends React.Component {
                         <Table.Cell>Years</Table.Cell>
                         <Table.Cell>
                             <Input
-                                onChange={(e) => this.setState({ minYear: e.target.value })}
+                                onChange={(e) => statqueryUpdateMinYear(e.target.value)}
                                 type='number'
                                 value={minYear}
                                 min={1891}
@@ -226,7 +185,7 @@ class StatQuery extends React.Component {
                         </Table.Cell>
                         <Table.Cell>
                             <Input
-                                onChange={(e) => this.setState({ maxYear: e.target.value })}
+                                onChange={(e) => statqueryUpdateMaxYear(e.target.value)}
                                 type='number'
                                 value={maxYear}
                                 min={1891}
@@ -252,15 +211,16 @@ class StatQuery extends React.Component {
                                 </Table.Cell>
                                 <Table.Cell>
                                     <Input
-                                        onChange={(e) => this.handleUpdateStatMinMax('min', s, e.target.value)}
+                                        onChange={(e) => statqueryUpdateStatValue(s, 'min', e.target.value)}
                                         type='number'
                                         min={0}
                                         value={min}
+                                        error={!min}
                                     />
                                 </Table.Cell>
                                 <Table.Cell>
                                     <Input
-                                        onChange={(e) => this.handleUpdateStatMinMax('max', s, e.target.value)}
+                                        onChange={(e) => statqueryUpdateStatValue(s, 'max', e.target.value)}
                                         type={+max ? 'number' : 'text'}
                                         min={0}
                                         value={+max ? max : 'N/A'}
@@ -277,7 +237,7 @@ class StatQuery extends React.Component {
                 >
                     Submit
                 </Button>
-                <Button onClick={() => this.handleReset()} content='Reset' />
+                <Button onClick={() => statqueryReset()} content='Reset' />
             { loading &&
                 <Segment><Loader active /></Segment>
             }
@@ -285,7 +245,7 @@ class StatQuery extends React.Component {
                 <Container>
                     <Header as='h4' content={`Your search contained ${battingLinesArray.length} result${battingLinesArray.length === 1 ? '' : 's'}`} />
                 { battingLinesArray.length > 0 &&
-                    <BattingStatsTable statlineArray={battingLinesArray} />
+                    <BattingStatsTable />
                 }
                 </Container>
             }
@@ -294,4 +254,34 @@ class StatQuery extends React.Component {
     }
 }
 
-module.exports = StatQuery;
+
+const mapStateToProps = (state) => {
+
+    return {
+        battingLinesArray: state.statQuery.battingLinesArray,
+        hasData: state.statQuery.hasData,
+        loading: state.statQuery.loading,
+        minAb: state.statQuery.minAb,
+        minYear: state.statQuery.minYear,
+        maxYear: state.statQuery.maxYear,
+        stats: state.statQuery.stats
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+
+    return bindActionCreators({
+        statqueryUpdateLoading,
+        statqueryFetchBattingLinesSuccess,
+        statqueryFetchBattingLinesFailure,
+        statqueryUpdateMinAb,
+        statqueryUpdateMinYear,
+        statqueryUpdateMaxYear,
+        statqueryToggleStatActive,
+        statqueryUpdateStatValue,
+        statqueryReset
+    }, dispatch);
+}
+
+
+module.exports = connect(mapStateToProps, mapDispatchToProps)(StatQuery);
