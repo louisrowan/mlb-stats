@@ -46,6 +46,22 @@ export const statqueryUpdateMaxYear = (value) => {
     }
 }
 
+const STATQUERY_UPDATE_MIN_AGE = 'STATQUERY_UPDATE_MIN_AGE';
+export const statqueryUpdateMinAge = (value) => {
+    return {
+        type: STATQUERY_UPDATE_MIN_AGE,
+        value
+    }
+}
+
+const STATQUERY_UPDATE_MAX_AGE = 'STATQUERY_UPDATE_MAX_AGE';
+export const statqueryUpdateMaxAge = (value) => {
+    return {
+        type: STATQUERY_UPDATE_MAX_AGE,
+        value
+    }
+}
+
 const STATQUERY_TOGGLE_STAT_ACTIVE = 'STATQUERY_TOGGLE_STAT_ACTIVE';
 export const statqueryToggleStatActive = (stat) => {
     return {
@@ -85,8 +101,10 @@ const initialState = {
     battingLinesArray: [],
     hasData: false,
     loading: false,
-    maxYear: 2016,
     minAb: 100,
+    minAge: 0,
+    maxAge: 100,
+    maxYear: 2016,
     minYear: 1891,
     sorted: {},
     statNames: ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'],
@@ -205,6 +223,16 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 maxYear: action.value
+            }
+        case STATQUERY_UPDATE_MIN_AGE:
+            return {
+                ...state,
+                minAge: action.value
+            }
+        case STATQUERY_UPDATE_MAX_AGE:
+            return {
+                ...state,
+                maxAge: action.value
             }
         case STATQUERY_TOGGLE_STAT_ACTIVE:
             return toggleStatActiveReducer(state, action);

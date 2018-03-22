@@ -107,10 +107,13 @@ const formatBattingData = (data, namesFile) => {
 
     const id = data[0];
     const index = internals.getIndexFromId(namesFile, id);
+    const year = data[1];
+    const birthYear = namesFile[index][8];
 
     const res = {};
     res.name = namesFile[index][3];
-    res.year = data[1];
+    res.age = +year - +birthYear;
+    res.year = year;
     res.teamId = data[2]
     res.g = +data[3];
     res.ab = +data[4];

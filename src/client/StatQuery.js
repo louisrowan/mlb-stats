@@ -9,6 +9,8 @@ const {
     statqueryFetchBattingLinesSuccess,
     statqueryFetchBattingLinesFailure,
     statqueryUpdateMinAb,
+    statqueryUpdateMinAge,
+    statqueryUpdateMaxAge,
     statqueryUpdateMinYear,
     statqueryUpdateMaxYear,
     statqueryToggleStatActive,
@@ -42,11 +44,20 @@ class StatQuery extends React.Component {
 
     createPayload = () => {
 
-        const { minAb, minYear, maxYear, stats } = this.props;
+        const {
+            minAb,
+            minAge,
+            maxAge,
+            minYear,
+            maxYear,
+            stats
+        } = this.props;
 
         const payload = {
             stats: {},
             minAb,
+            minAge,
+            maxAge,
             minYear,
             maxYear
         };
@@ -122,10 +133,14 @@ class StatQuery extends React.Component {
             hasData,
             loading,
             minAb,
+            minAge,
+            maxAge,
             minYear,
             maxYear,
             stats,
             statqueryUpdateMinAb,
+            statqueryUpdateMinAge,
+            statqueryUpdateMaxAge,
             statqueryUpdateMinYear,
             statqueryUpdateMaxYear,
             statqueryToggleStatActive,
@@ -190,6 +205,27 @@ class StatQuery extends React.Component {
                                 value={maxYear}
                                 min={1891}
                                 max={2016}
+                            />
+                        </Table.Cell>
+                    </Table.Row>
+                    <Table.Row>
+                        <Table.Cell>Age</Table.Cell>
+                        <Table.Cell>
+                            <Input
+                                onChange={(e) => statqueryUpdateMinAge(e.target.value)}
+                                type='number'
+                                value={minAge}
+                                min={0}
+                                max={100}
+                            />
+                        </Table.Cell>
+                        <Table.Cell>
+                            <Input
+                                onChange={(e) => statqueryUpdateMaxAge(e.target.value)}
+                                type='number'
+                                value={maxAge}
+                                min={0}
+                                max={100}
                             />
                         </Table.Cell>
                     </Table.Row>
@@ -262,6 +298,8 @@ const mapStateToProps = (state) => {
         hasData: state.statQuery.hasData,
         loading: state.statQuery.loading,
         minAb: state.statQuery.minAb,
+        minAge: state.statQuery.minAge,
+        maxAge: state.statQuery.maxAge,
         minYear: state.statQuery.minYear,
         maxYear: state.statQuery.maxYear,
         stats: state.statQuery.stats
@@ -275,6 +313,8 @@ const mapDispatchToProps = (dispatch) => {
         statqueryFetchBattingLinesSuccess,
         statqueryFetchBattingLinesFailure,
         statqueryUpdateMinAb,
+        statqueryUpdateMinAge,
+        statqueryUpdateMaxAge,
         statqueryUpdateMinYear,
         statqueryUpdateMaxYear,
         statqueryToggleStatActive,
