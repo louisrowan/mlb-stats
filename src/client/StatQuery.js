@@ -242,7 +242,7 @@ class StatQuery extends React.Component {
                 <Segment><Loader active /></Segment>
             }
             { hasData && 
-                <Container>
+                <Container fluid>
                     <Header as='h4' content={`Your search contained ${battingLinesArray.length} result${battingLinesArray.length === 1 ? '' : 's'}`} />
                 { battingLinesArray.length > 0 &&
                     <BattingStatsTable />

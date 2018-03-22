@@ -4,7 +4,7 @@ const { connect } = require('react-redux');
 const { bindActionCreators } = require('redux')
 const { statquerySortBattingStats } = require('./redux/modules/statQuery');
 
-const { Table } = require('semantic-ui-react');
+const { Icon, Table } = require('semantic-ui-react');
 
 
 class BattingStatsTable extends React.Component {
@@ -18,6 +18,7 @@ class BattingStatsTable extends React.Component {
     render () {
 
         const {
+            sorted,
             statlineArray,
             statquerySortBattingStats
         } = this.props;
@@ -26,10 +27,26 @@ class BattingStatsTable extends React.Component {
             <Table>
                 <Table.Body>
                     <Table.Row>
-                        {Object.keys(statlineArray[0]).map((header) => <Table.Cell
-                            key={header}
-                            onClick={() => statquerySortBattingStats(header, 'positive')}
-                            >{header}</Table.Cell>)}
+                        {Object.keys(statlineArray[0]).map((header) => {
+
+                            const isSorted = sorted.stat === header;
+                            const isSortedDesc = (isSorted && sorted.direction === 'desc');
+
+                            return (
+                                <Table.Cell
+                                    key={header}
+                                    onClick={() => statquerySortBattingStats(header)}
+                                    singleLine
+                                    active={isSorted}
+                                    >
+                                    {header}
+                                    <Icon
+                                        name={isSorted ? isSortedDesc ? 'sort descending' : 'sort ascending' : 'hand pointer'}
+                                        size='small'
+                                    />
+                                </Table.Cell>
+                            )
+                        })}
                     </Table.Row>
                     {statlineArray.map((year, index) => {
 
@@ -37,7 +54,16 @@ class BattingStatsTable extends React.Component {
                             <Table.Row key={index}>
                                 {Object.keys(year).map((stat) => {
 
-                                    return <Table.Cell key={stat}>{year[stat]}</Table.Cell>
+                                    const isSorted = sorted.stat === stat;
+
+                                    return (
+                                        <Table.Cell
+                                            key={stat}
+                                            positive={isSorted}
+                                        >
+                                            {year[stat]}
+                                        </Table.Cell>
+                                    )
                                 })}
                             </Table.Row>
                         )
@@ -50,6 +76,7 @@ class BattingStatsTable extends React.Component {
 
 const mapStateToProps = state => {
     return {
+        sorted: state.statQuery.sorted,
         statlineArray: state.statQuery.battingLinesArray
     }
 }
