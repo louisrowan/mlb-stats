@@ -9,10 +9,10 @@ const NavBar = () => {
     return (
         <Segment inverted color='green'>
             <Link to='/query'>
-                <Button content='Query' />
+                <Button content='Batting Stats Search' />
             </Link>
-            <Link to='/home'>
-                <Button content='Home' />
+            <Link to='/playerSearch'>
+                <Button content='Player Search' />
             </Link>
         </Segment>
     )

@@ -6,7 +6,9 @@
   "scripts": {
     "server": "nodemon src/server/index.js",
     "build": "node-gyp configure build",
-    "watch": "webpack --watch"
+    "watch": "node_modules/.bin/webpack --watch",
+    "foreverstart": "node_modules/.bin/webpack && forever start src/server/index.js",
+    "foreverstop": "forever stopall"
   },
   "repository": {
     "type": "git",

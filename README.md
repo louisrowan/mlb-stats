@@ -9,7 +9,10 @@ Current functionality includes searching for specific yearly parameters (maximum
 To run locally:
 
     npm install
-    webpack
+    node_modules/.bin/webpack
     npm run server
 
 Open a browser and direct yourself to [http://localhost:3001](http://localhost:3001)
+
+## Deployment
+Deployed on a Ubuntu machine from [Digital Ocean](https://www.digitalocean.com/) at [Rotosearch.com](http://www.rotosearch.com/)

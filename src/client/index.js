@@ -9,9 +9,9 @@ const {
 const { Provider } = require('react-redux');
 const Store = require('./redux/store');
 
-const NavBar = require('./NavBar');
-const Home = require('./Home');
-const StatQuery = require('./StatQuery');
+const NavBar = require('./containers/NavBar');
+const PlayerSearch = require('./containers/PlayerSearch');
+const StatQuery = require('./containers/StatQuery');
 
 const App = () => {
 
@@ -22,7 +22,7 @@ const App = () => {
                 <div>
                     <NavBar />
                     <Route path='/query' component={StatQuery} />
-                    <Route path='/home' component={Home} />
+                    <Route path='/playerSearch' component={PlayerSearch} />
                 </div>
                 </Route>
             </BrowserRouter>
