@@ -1,9 +1,5 @@
 const React = require('react');
 
-const { connect } = require('react-redux');
-const { bindActionCreators } = require('redux')
-const { statquerySortBattingStats } = require('./redux/modules/statQuery');
-
 const { Icon, Table } = require('semantic-ui-react');
 
 
@@ -63,7 +59,7 @@ class BattingStatsTable extends React.Component {
         } = this.state;
 
         return (
-            <Table>
+            <Table definition striped>
                 <Table.Body>
                     <Table.Row>
                         {Object.keys(statlineArray[0]).map((header) => {
@@ -77,6 +73,7 @@ class BattingStatsTable extends React.Component {
                                     onClick={() => this.sortStats(header)}
                                     singleLine
                                     active={isSorted}
+                                    style={{ cursor: 'pointer' }}
                                     >
                                     {header}
                                     <Icon

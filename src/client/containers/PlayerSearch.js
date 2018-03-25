@@ -3,37 +3,48 @@ const Axios = require('axios');
 
 const {
     Button,
+    Card,
     Container,
-    Input,
-    List,
+    Input
 } = require ('semantic-ui-react');
 
 
-const BattingStatsTable = require('./BattingStatsTable');
+const BattingStatsTable = require('../components/BattingStatsTable');
 
 
 const PlayerListItem = (props) => {
 
     const {
+        debut,
         id,
         fullName,
+        positions,
         teams
     } = props.player;
 
     const { handleActivePlayerChange} = props;
 
     return (
-        <List.Item>
-            <Button onClick={() => handleActivePlayerChange(id)}>
-                {fullName} | {teams.map((t, i) => <span key={`${id}-${i}`}>{`${t.abbreviation} `}</span>)}
-            </Button>
-        </List.Item>
+        <Card id={id} onClick={() => handleActivePlayerChange(id)}>
+            <Card.Content>
+                <Card.Header>{fullName}</Card.Header>
+            </Card.Content>
+            <Card.Content>
+                <Card.Meta>Debut: {debut}</Card.Meta>
+                <Card.Meta>
+                    {positions.map((p, i) => `${i > 0 ? '- ' : ''}${p} `)}
+                </Card.Meta>
+                <Card.Meta>
+                    {teams.map((t, i) => `${i > 0 ? '- ' : ''}${t.abbreviation} `)}
+                </Card.Meta>
+             </Card.Content>
+        </Card>
     )
 }
 
 
 
-class Home extends React.Component {
+class PlayerSearch extends React.Component {
 
     constructor() {
 
@@ -69,7 +80,7 @@ class Home extends React.Component {
         Axios.get('/api/players/' + playerId + '/batting')
             .then(res => {
 
-                this.setState({ activePlayer: res.data });
+                this.setState({ activePlayer: res.data, searchTerm: '' });
             })
             .catch(err => console.log('err getting batting data', err));
     }
@@ -133,19 +144,23 @@ class Home extends React.Component {
 
 
         return (
-            <Container>
-            <Input
-                value={searchTerm}
-                onChange={this.handleSearchTermChange}
-                placeholder='Search for a player, team or position'
-                fluid
+            <Container fluid style={{ overflow: 'auto' }}>
+                <Input
+                    value={searchTerm}
+                    onChange={this.handleSearchTermChange}
+                    placeholder='Search for a player, team or position'
+                    fluid
                 />
-            { players.length > 0 && searchTerm.length > 2 && <List>{filter}</List> }
-            { activePlayer.length > 0 && <BattingStatsTable statlineArray={activePlayer} /> }
+            { players.length > 0 && searchTerm.length > 2 &&
+                <Card.Group>{filter}</Card.Group>
+            }
+            { activePlayer.length > 0 &&
+                <BattingStatsTable statlineArray={activePlayer} />
+            }
             </Container>
         )
 
     }
 }
 
-module.exports = Home;
+module.exports = PlayerSearch;

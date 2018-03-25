@@ -16,7 +16,7 @@ const {
     statqueryToggleStatActive,
     statqueryUpdateStatValue,
     statqueryReset
-} = require('./redux/modules/statQuery');
+} = require('../redux/modules/statQuery');
 
 const {
     Button,
@@ -30,7 +30,20 @@ const {
     Segment
  } = require('semantic-ui-react');
 
-const BattingStatsTable = require('./BattingStatsTable');
+const BattingStatsTable = require('../components/BattingStatsTable');
+
+
+const Footer = (props) => {
+
+    return (
+        <Container fluid>
+            <Header as='h3' content='About' />
+            <p>
+                Select and specify statistics for search.
+            </p>
+        </Container>
+    )
+}
 
 
 
@@ -149,7 +162,7 @@ class StatQuery extends React.Component {
         } = this.props;
 
         return (
-            <Container fluid>
+            <Container fluid style={{ overflow: 'auto' }}>
                 <Segment>
                     <List horizontal>
                         {Object.keys(stats).map((s) => {
@@ -262,6 +275,12 @@ class StatQuery extends React.Component {
                                         value={+max ? max : 'N/A'}
                                         />
                                 </Table.Cell>
+                                <Table.Cell>
+                                    <Button
+                                        onClick={(e) => statqueryToggleStatActive(s)}
+                                        icon='cancel'
+                                    />
+                                </Table.Cell>
                             </Table.Row>
                             )
                         })}
@@ -285,6 +304,7 @@ class StatQuery extends React.Component {
                 }
                 </Container>
             }
+            <Footer />
             </Container>
         )
     }
