@@ -2,6 +2,7 @@
 
 const Fs = require('fs');
 const Path = require('path');
+const _ = require('lodash');
 
 const NamesCSV = Path.resolve(__dirname, './data/names.csv');
 
@@ -35,6 +36,18 @@ internals.getIndexFromId = (namesArray, id) => {
         return midpoint + internals.getIndexFromId(namesArray.slice(midpoint, length), id);
     }
 }
+
+internals.formatPercentageStat = (stat) => {
+
+    if (!stat.includes('.')) {
+        console.warn('invalid stat passed to Common.formatPercentageStat', stat)
+    }
+
+    if (stat[0] === '0') {
+        return _.padEnd(stat.substring(1, stat.length), 4, '0');
+    }
+    return _.padEnd(stat, 5, '0');
+};
 
 
 
@@ -113,26 +126,26 @@ const formatBattingData = (data, namesFile) => {
     const res = {};
     res.name = namesFile[index][3];
     res.age = +year - +birthYear;
-    res.year = year;
-    res.teamId = data[2]
-    res.g = +data[3];
-    res.ab = +data[4];
-    res.r = +data[5];
-    res.h = +data[6];
-    res['2b'] = +data[7];
-    res['3b'] = +data[8];
-    res.hr = +data[9];
-    res.rbi = +data[10];
-    res.sb = +data[11];
-    res.cs = +data[12];
-    res.bb = +data[13];
-    res.k = +data[14];
-    res.hbp = +data[15];
-    res.sf = +data[16];
-    res.avg = +data[17];
-    res.obp = +data[18];
-    res.slg = +data[19];
-    res.ops = +data[20];
+    res.year = +year;
+    res.teamId = data[2];
+    res.g = +data[3] || 0;
+    res.ab = +data[4] || 0;
+    res.r = +data[5] || 0;
+    res.h = +data[6] || 0;
+    res['2b'] = +data[7] || 0;
+    res['3b'] = +data[8] || 0;
+    res.hr = +data[9] || 0;
+    res.rbi = +data[10] || 0;
+    res.sb = +data[11] || 0;
+    res.cs = +data[12] || 0;
+    res.bb = +data[13] || 0;
+    res.k = +data[14] || 0;
+    res.hbp = +data[15] || 0;
+    res.sf = +data[16] || 0;
+    res.avg = +(internals.formatPercentageStat(data[17])) || .000;
+    res.obp = +(internals.formatPercentageStat(data[18])) || .000;
+    res.slg = +(internals.formatPercentageStat(data[19])) || .000;
+    res.ops = +(internals.formatPercentageStat(data[20])) || .000;
 
     return res;
 }

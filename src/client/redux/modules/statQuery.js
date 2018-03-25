@@ -87,13 +87,13 @@ export const statqueryReset = () => {
     }
 }
 
-const STATQUERY_SORT_BATTING_STATS = 'STATQUERY_SORT_BATTING_STATS';
-export const statquerySortBattingStats = (stat, direction) => {
-    return {
-        type: STATQUERY_SORT_BATTING_STATS,
-        stat
-    }
-}
+// const STATQUERY_SORT_BATTING_STATS = 'STATQUERY_SORT_BATTING_STATS';
+// export const statquerySortBattingStats = (stat, direction) => {
+//     return {
+//         type: STATQUERY_SORT_BATTING_STATS,
+//         stat
+//     }
+// }
 
 
 // initial state
@@ -106,7 +106,7 @@ const initialState = {
     maxAge: 100,
     maxYear: 2016,
     minYear: 1891,
-    sorted: {},
+    // sorted: {},
     statNames: ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'],
     stats: {}
 };
@@ -156,32 +156,32 @@ const updateStatValueReducer = (state, action) => {
     }
 };
 
-const sortBattingStatsReducer = (state, action) => {
+// const sortBattingStatsReducer = (state, action) => {
 
-    const { stat } = action;
+//     const { stat } = action;
 
-    let reverse = false;
-    if (state.sorted.stat === stat && state.sorted.direction === 'desc') {
-        reverse = true;
-    }
+//     let reverse = false;
+//     if (state.sorted.stat === stat && state.sorted.direction === 'desc') {
+//         reverse = true;
+//     }
 
-    const sorted = state.battingLinesArray.sort((a, b) => {
+//     const sorted = state.battingLinesArray.sort((a, b) => {
 
-        if (a[stat] < b[stat]) {
-            return reverse ? -1 : 1;
-        }
-        return reverse ? 1 : -1;
-    });
+//         if (a[stat] < b[stat]) {
+//             return reverse ? -1 : 1;
+//         }
+//         return reverse ? 1 : -1;
+//     });
 
-    return {
-        ...state,
-        battingLinesArray: [ ...sorted ],
-        sorted: {
-            stat: stat,
-            direction: reverse ? 'asc' : 'desc'
-        }
-    }
-}
+//     return {
+//         ...state,
+//         battingLinesArray: [ ...sorted ],
+//         sorted: {
+//             stat: stat,
+//             direction: reverse ? 'asc' : 'desc'
+//         }
+//     }
+// }
 
 
 // statQuery root reducer
@@ -240,8 +240,8 @@ export const reducer = (state = initialState, action) => {
             return updateStatValueReducer(state, action);
         case STATQUERY_RESET:
             return initialState;
-        case STATQUERY_SORT_BATTING_STATS:
-            return sortBattingStatsReducer(state, action);
+        // case STATQUERY_SORT_BATTING_STATS:
+        //     return sortBattingStatsReducer(state, action);
         default:
             return state;
     }

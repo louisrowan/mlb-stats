@@ -12,16 +12,55 @@ class BattingStatsTable extends React.Component {
     constructor (props) {
 
         super (props);
+
+        this.state = {
+            sortedStat: '',
+            sortedDirection: '',
+            statlineArray: this.props.statlineArray.slice(0) // copy statline array props into state so that it can be reordered in this component when sorted. Parent does not need to be updated on this since sorting is just a visual of data and alerting the parent to update its data is not needed for this use case. This also allows for multiple parents to use this child component without needing all of them to know how to handle sorted data.
+        };
+    }
+
+
+    sortStats = (stat) => {
+
+        const { sortedStat, sortedDirection, statlineArray } = this.state;
+
+        let reverse = false;
+        if (sortedStat === stat && sortedDirection === 'desc') {
+            reverse = true;
+        }
+
+        const sorted = statlineArray.sort((a, b) => {
+
+            if (a[stat] < b[stat]) {
+                return reverse ? -1 : 1;
+            }
+            return reverse ? 1 : -1;
+        });
+
+        this.setState({
+            statlineArray: sorted,
+            sortedStat: stat,
+            sortedDirection: reverse ? ' asc' : 'desc'
+        });
     }
 
 
     render () {
 
         const {
-            sorted,
-            statlineArray,
-            statquerySortBattingStats
+            // sorted,
+            // statlineArray,
+            // statquerySortBattingStats
         } = this.props;
+
+        const {
+            sortedStat,
+            sortedDirection,
+            statlineArray
+        } = this.state;
+
+        console.log(statlineArray);
 
         return (
             <Table>
@@ -29,13 +68,13 @@ class BattingStatsTable extends React.Component {
                     <Table.Row>
                         {Object.keys(statlineArray[0]).map((header) => {
 
-                            const isSorted = sorted.stat === header;
-                            const isSortedDesc = (isSorted && sorted.direction === 'desc');
+                            const isSorted = sortedStat === header;
+                            const isSortedDesc = (isSorted && sortedDirection === 'desc');
 
                             return (
                                 <Table.Cell
                                     key={header}
-                                    onClick={() => statquerySortBattingStats(header)}
+                                    onClick={() => this.sortStats(header)}
                                     singleLine
                                     active={isSorted}
                                     >
@@ -54,7 +93,7 @@ class BattingStatsTable extends React.Component {
                             <Table.Row key={index}>
                                 {Object.keys(year).map((stat) => {
 
-                                    const isSorted = sorted.stat === stat;
+                                    const isSorted = sortedStat === stat;
 
                                     return (
                                         <Table.Cell
@@ -74,18 +113,19 @@ class BattingStatsTable extends React.Component {
     }
 };
 
-const mapStateToProps = state => {
-    return {
-        sorted: state.statQuery.sorted,
-        statlineArray: state.statQuery.battingLinesArray
-    }
-}
+// const mapStateToProps = state => {
+//     return {
+//         sorted: state.statQuery.sorted,
+//         statlineArray: state.statQuery.battingLinesArray
+//     }
+// }
 
-const mapDispatchToProps = dispatch => {
+// const mapDispatchToProps = dispatch => {
 
-    return bindActionCreators({
-        statquerySortBattingStats
-    }, dispatch);
-}
+//     return bindActionCreators({
+//         statquerySortBattingStats
+//     }, dispatch);
+// }
 
-module.exports = connect(mapStateToProps, mapDispatchToProps)(BattingStatsTable);
+// module.exports = connect(mapStateToProps, mapDispatchToProps)(BattingStatsTable);
+module.exports = BattingStatsTable;
