@@ -15,4 +15,4 @@ To run locally:
 Open a browser and direct yourself to [http://localhost:3001](http://localhost:3001)
 
 ## Deployment
-Deployed on a Ubuntu machine from [Digital Ocean](https://www.digitalocean.com/) at [Rotosearch.com](http://www.rotosearch.com/)
+Deployed on a Ubuntu machine from [Digital Ocean](https://www.digitalocean.com/) at [Rotosearch.com](http://rotosearch.com/)
