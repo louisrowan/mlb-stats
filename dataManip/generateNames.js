@@ -102,6 +102,7 @@ const generateNamesMap = () => {
         res.finalGame = p[21];
         res.positions = positionMap[id];
         res.teams = teamMap[id];
+        res.birthYear = p[1];
 
         if (id) playerMap[id] = res;
     })
@@ -136,6 +137,7 @@ const generateNamesFile = (namesMap) => {
             });
 
             line.push(teams.join('-'));
+            line.push(player.birthYear);
 
             const string = line.join(',') + '\n';
             file += string;

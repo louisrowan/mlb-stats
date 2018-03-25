@@ -118,6 +118,9 @@ module.exports = (req, res) => {
     const minAb = +payload.minAb;
     const minYear = +payload.minYear;
     const maxYear = +payload.maxYear;
+    const minAge = +payload.minAge || 0;
+    const maxAge = +payload.maxAge || 100;
+
     const battingLines = [];
     const namesFile = Common.readNamesFile();
 
@@ -186,7 +189,10 @@ module.exports = (req, res) => {
 
             // loop thru additional stats in payload to see if they are also a match
             let matchesAll = true;
+            if (+player.age < minAge || +player.age > maxAge) matchesAll = false;
             additionalMatches.forEach((match) => {
+
+                if (!matchesAll) return;
 
                 const splitStats = match.params.split(',');
                 const min = +splitStats[0];

@@ -46,6 +46,22 @@ export const statqueryUpdateMaxYear = (value) => {
     }
 }
 
+const STATQUERY_UPDATE_MIN_AGE = 'STATQUERY_UPDATE_MIN_AGE';
+export const statqueryUpdateMinAge = (value) => {
+    return {
+        type: STATQUERY_UPDATE_MIN_AGE,
+        value
+    }
+}
+
+const STATQUERY_UPDATE_MAX_AGE = 'STATQUERY_UPDATE_MAX_AGE';
+export const statqueryUpdateMaxAge = (value) => {
+    return {
+        type: STATQUERY_UPDATE_MAX_AGE,
+        value
+    }
+}
+
 const STATQUERY_TOGGLE_STAT_ACTIVE = 'STATQUERY_TOGGLE_STAT_ACTIVE';
 export const statqueryToggleStatActive = (stat) => {
     return {
@@ -71,22 +87,16 @@ export const statqueryReset = () => {
     }
 }
 
-const STATQUERY_SORT_BATTING_STATS = 'STATQUERY_SORT_BATTING_STATS';
-export const statquerySortBattingStats = (stat, direction) => {
-    return {
-        type: STATQUERY_SORT_BATTING_STATS,
-        stat, direction
-    }
-}
-
 
 // initial state
 const initialState = {
     battingLinesArray: [],
     hasData: false,
     loading: false,
-    maxYear: 2016,
     minAb: 100,
+    minAge: 0,
+    maxAge: 100,
+    maxYear: 2016,
     minYear: 1891,
     statNames: ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'],
     stats: {}
@@ -137,23 +147,6 @@ const updateStatValueReducer = (state, action) => {
     }
 };
 
-const sortBattingStatsReducer = (state, action) => {
-
-    const { stat, direction } = action;
-
-    const sorted = state.battingLinesArray.sort((a, b) => {
-
-        if (a[stat] < b[stat]) {
-            return 1;
-        }
-        return -1;
-    });
-
-    return {
-        ...state,
-        battingLinesArray: [ ...sorted ]
-    }
-}
 
 
 // statQuery root reducer
@@ -194,14 +187,22 @@ export const reducer = (state = initialState, action) => {
                 ...state,
                 maxYear: action.value
             }
+        case STATQUERY_UPDATE_MIN_AGE:
+            return {
+                ...state,
+                minAge: action.value
+            }
+        case STATQUERY_UPDATE_MAX_AGE:
+            return {
+                ...state,
+                maxAge: action.value
+            }
         case STATQUERY_TOGGLE_STAT_ACTIVE:
             return toggleStatActiveReducer(state, action);
         case STATQUERY_UPDATE_STAT_VALUE:
             return updateStatValueReducer(state, action);
         case STATQUERY_RESET:
             return initialState;
-        case STATQUERY_SORT_BATTING_STATS:
-            return sortBattingStatsReducer(state, action);
         default:
             return state;
     }
