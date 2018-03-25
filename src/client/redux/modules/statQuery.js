@@ -87,14 +87,6 @@ export const statqueryReset = () => {
     }
 }
 
-// const STATQUERY_SORT_BATTING_STATS = 'STATQUERY_SORT_BATTING_STATS';
-// export const statquerySortBattingStats = (stat, direction) => {
-//     return {
-//         type: STATQUERY_SORT_BATTING_STATS,
-//         stat
-//     }
-// }
-
 
 // initial state
 const initialState = {
@@ -106,7 +98,6 @@ const initialState = {
     maxAge: 100,
     maxYear: 2016,
     minYear: 1891,
-    // sorted: {},
     statNames: ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'],
     stats: {}
 };
@@ -156,38 +147,10 @@ const updateStatValueReducer = (state, action) => {
     }
 };
 
-// const sortBattingStatsReducer = (state, action) => {
-
-//     const { stat } = action;
-
-//     let reverse = false;
-//     if (state.sorted.stat === stat && state.sorted.direction === 'desc') {
-//         reverse = true;
-//     }
-
-//     const sorted = state.battingLinesArray.sort((a, b) => {
-
-//         if (a[stat] < b[stat]) {
-//             return reverse ? -1 : 1;
-//         }
-//         return reverse ? 1 : -1;
-//     });
-
-//     return {
-//         ...state,
-//         battingLinesArray: [ ...sorted ],
-//         sorted: {
-//             stat: stat,
-//             direction: reverse ? 'asc' : 'desc'
-//         }
-//     }
-// }
 
 
 // statQuery root reducer
 export const reducer = (state = initialState, action) => {
-
-    console.log('action', action);
 
     switch (action.type) {
         case STATQUERY_UPDATE_LOADING:
@@ -240,8 +203,6 @@ export const reducer = (state = initialState, action) => {
             return updateStatValueReducer(state, action);
         case STATQUERY_RESET:
             return initialState;
-        // case STATQUERY_SORT_BATTING_STATS:
-        //     return sortBattingStatsReducer(state, action);
         default:
             return state;
     }

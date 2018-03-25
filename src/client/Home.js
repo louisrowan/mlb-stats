@@ -25,7 +25,7 @@ const PlayerListItem = (props) => {
     return (
         <List.Item>
             <Button onClick={() => handleActivePlayerChange(id)}>
-                {fullName} | {teams.map((t) => <span>{`${t.abbreviation} `}</span>)}
+                {fullName} | {teams.map((t, i) => <span key={`${id}-${i}`}>{`${t.abbreviation} `}</span>)}
             </Button>
         </List.Item>
     )
@@ -48,8 +48,6 @@ class Home extends React.Component {
         Axios.get('/api/players')
             .then(res => {
 
-                console.log('req made', res.data);
-
                 this.setState({ players: res.data })
             })
             .catch(err => console.log('err'));
@@ -71,11 +69,9 @@ class Home extends React.Component {
         Axios.get('/api/players/' + playerId + '/batting')
             .then(res => {
 
-                console.log('d', res.data);
-
                 this.setState({ activePlayer: res.data });
             })
-            .catch(err => console.log('err getting batting data'));
+            .catch(err => console.log('err getting batting data', err));
     }
 
 
@@ -127,7 +123,11 @@ class Home extends React.Component {
             }
         }).map((player, i) => {
 
-            return <PlayerListItem player={player} handleActivePlayerChange={this.handleActivePlayerChange} />
+            return (<PlayerListItem
+                        key={`${player.id}-${i}`}
+                        player={player}
+                        handleActivePlayerChange={this.handleActivePlayerChange}
+                    />)
         }) : '';
 
 

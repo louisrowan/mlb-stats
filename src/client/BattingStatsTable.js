@@ -21,6 +21,14 @@ class BattingStatsTable extends React.Component {
     }
 
 
+    componentWillReceiveProps = (newProps) => {
+
+        if (newProps.statlineArray) {
+            this.setState({ statlineArray: newProps.statlineArray})
+        }
+    }
+
+
     sortStats = (stat) => {
 
         const { sortedStat, sortedDirection, statlineArray } = this.state;
@@ -49,18 +57,10 @@ class BattingStatsTable extends React.Component {
     render () {
 
         const {
-            // sorted,
-            // statlineArray,
-            // statquerySortBattingStats
-        } = this.props;
-
-        const {
             sortedStat,
             sortedDirection,
             statlineArray
         } = this.state;
-
-        console.log(statlineArray);
 
         return (
             <Table>
@@ -113,19 +113,5 @@ class BattingStatsTable extends React.Component {
     }
 };
 
-// const mapStateToProps = state => {
-//     return {
-//         sorted: state.statQuery.sorted,
-//         statlineArray: state.statQuery.battingLinesArray
-//     }
-// }
 
-// const mapDispatchToProps = dispatch => {
-
-//     return bindActionCreators({
-//         statquerySortBattingStats
-//     }, dispatch);
-// }
-
-// module.exports = connect(mapStateToProps, mapDispatchToProps)(BattingStatsTable);
 module.exports = BattingStatsTable;
