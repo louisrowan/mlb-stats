@@ -36,12 +36,12 @@ const BattingStatsTable = require('../components/BattingStatsTable');
 const Footer = (props) => {
 
     return (
-        <Container fluid>
-            <Header as='h3' content='About' />
+        <Segment>
+            <Header as='h3' content='How to Use' />
             <p>
-                Select and specify statistics for search.
+                This interface is provided to query all <b>100,000</b> MLB seasonal batting lines for custom performance. Allows for minimum and max (if desired) performance for the shown statistics, as well as control over age, year, and minimum at-bat count.
             </p>
-        </Container>
+        </Segment>
     )
 }
 
