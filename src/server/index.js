@@ -1,5 +1,7 @@
 'use strict';
 
+require('./api/data'); // setup data
+
 const BodyParser = require('body-parser');
 const Express = require('express');
 const Path = require('path');

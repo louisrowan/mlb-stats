@@ -5,20 +5,18 @@ const Path = require('path');
 
 const BattingData = '../data/formattedBatting.csv';
 const Common = require('../common');
+const Data = require('../data');
 
 
 
 module.exports = (req, res) => {
 
     const playerId = req.params.id;
-    const namesFile = Common.readNamesFile();
-    
-    const raw = Fs.readFileSync(Path.resolve(__dirname, BattingData))
-    const stringified = raw.toString();
 
+    const namesFile = Data.NamesFile;
+    const battingStatsArray = Data.BattingLinesFile;
 
-    const battingStatsArray = stringified.split('\n');
-    const idsOnly = battingStatsArray.map((str) => str.split(',')[0]);
+    const idsOnly = battingStatsArray.map((str) => str[0]);
     const indexInArray = Common.findBattingLineById(idsOnly, playerId);
 
     let startIndex = indexInArray;
@@ -32,10 +30,7 @@ module.exports = (req, res) => {
     }
 
     const matchingStats = battingStatsArray.slice(startIndex + 1, endIndex);
-
-    const splitMatchingStats = matchingStats.map((year) => year.split(','));
-
-    const formattedMatchingStats = splitMatchingStats.map((year) => Common.formatBattingData(year, namesFile));
+    const formattedMatchingStats = matchingStats.map((year) => Common.formatBattingData(year, namesFile));
 
     res.send(formattedMatchingStats);
 };

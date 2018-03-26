@@ -3,9 +3,8 @@
 const Fs = require('fs');
 const Path = require('path');
 
-const BattingLinesFile = Path.resolve(__dirname, '../data/formattedBatting.csv');
-
 const Common = require('../common');
+const Data = require('../data');
 
 
 
@@ -122,14 +121,9 @@ module.exports = (req, res) => {
     const maxAge = +payload.maxAge || 100;
 
     const battingLines = [];
-    const namesFile = Common.readNamesFile();
 
-
-    // read in batting lines file for later use
-    const rawBattingLinesFile = Fs.readFileSync(BattingLinesFile, 'utf-8').split('\n');
-    const formattedBattingLines = rawBattingLinesFile.map((line) => line.split(','));
-
-
+    const namesFile = Data.NamesFile;
+    const formattedBattingLines = Data.BattingLinesFile;
 
     // prepare stat params
     const firstStat = {};

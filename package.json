@@ -43,7 +43,9 @@
     "webpack": "2.x.x"
   },
   "devDependencies": {
+    "code": "^4.1.0",
     "css-loader": "^0.28.11",
+    "lab": "^14.3.3",
     "style-loader": "^0.20.3",
     "webpack-cli": "^2.0.11"
   }

@@ -1,15 +1,25 @@
 'use strict';
 
-const Fs = require('fs');
-const Path = require('path');
 const _ = require('lodash');
-
-const NamesCSV = Path.resolve(__dirname, './data/names.csv');
-
-
 
 const internals = {};
 
+
+// @purpose
+// take in array of player info and a playerId, recursively find player info from a given playerId
+// @params
+// namesArray: [ 'bondeje01',
+//   'Jeremy',
+//   'Bonderman',
+//   'Jeremy Bonderman',
+//   '2003-04-02',
+//   '2013-09-21',
+//   'P',
+//   'Detroit Tigers:DET-Seattle Mariners:SEA',
+//   '1982'
+// ]
+// id: bondsba01
+// @return: int or error
 internals.getIndexFromId = (namesArray, id) => {
 
     const length = namesArray.length;
@@ -37,6 +47,12 @@ internals.getIndexFromId = (namesArray, id) => {
     }
 }
 
+
+// @purpose
+// take in percentage stat like OBP and properly format with corrent # of decimal places
+// @params
+// stat: .30
+// @return formatted string .300
 internals.formatPercentageStat = (stat) => {
 
     if (!stat.includes('.')) {
@@ -51,16 +67,13 @@ internals.formatPercentageStat = (stat) => {
 
 
 
-
-const readNamesFile = () => {
-
-    const file = Fs.readFileSync(NamesCSV, 'utf-8').split('\n');
-    return file.map((line) => line.split(','));
-};
-
-
-
-
+// @purpose
+// take in array of playerIds and find index of a select id
+// @params
+// array: [aardsda01]
+// id: bondsba01
+// @return
+// int or error
 const findBattingLineById = (array, id) => {
 
     const length = array.length;
@@ -88,8 +101,36 @@ const findBattingLineById = (array, id) => {
 }
 
 
+// @purpose
+// find index of a full batting line from a given playerId and year
+// @params
+// battingLines: [ 'suzukic01',
+//   '2001',
+//   'SEA',
+//   '157',
+//   '692',
+//   '127',
+//   '242',
+//   '34',
+//   '8',
+//   '8',
+//   '69',
+//   '56',
+//   '14',
+//   '30',
+//   '53',
+//   '8',
+//   '4',
+//   '0.35',
+//   '0.381',
+//   '0.457',
+//   '0.838'
+// ]
+// id: suzukic01
+// year: 2004
+// @return
+// int or error
 const findBattingLineByIdYear = (battingLines, id, year) => {
-
 
     const length = battingLines.length;
     if (length === 1) {
@@ -116,6 +157,35 @@ const findBattingLineByIdYear = (battingLines, id, year) => {
     }
 }
 
+
+// @purpose
+// format a given battingLine array into a formatted battingLine object
+// @params
+// data: [ 'nixontr01',
+//   '2008',
+//   'NYN',
+//   '11',
+//   '35',
+//   '2',
+//   '6',
+//   '1',
+//   '0',
+//   '1',
+//   '1',
+//   '1',
+//   '0',
+//   '6',
+//   '9',
+//   '0',
+//   '0',
+//   '0.171',
+//   '0.293',
+//   '0.286',
+//   '0.579'
+// ]
+// namesFile: file with id/name mapping
+// @return
+// formatted battingLine object
 const formatBattingData = (data, namesFile) => {
 
     const id = data[0];
@@ -152,7 +222,6 @@ const formatBattingData = (data, namesFile) => {
 
 
 module.exports = {
-    readNamesFile,
     findBattingLineById,
     findBattingLineByIdYear,
     formatBattingData
