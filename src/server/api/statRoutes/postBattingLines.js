@@ -130,18 +130,20 @@ module.exports = (req, res) => {
     const additionalMatches = [];
     let minCount;
     let minStat = '';
+    let minResults = [];
     Object.keys(stats).forEach((stat) => {
 
         const splitStats = stats[stat].split(',');
         const min = +splitStats[0];
         const max = +splitStats[1];
 
-        const results = internals.getMatchingStats(stat, min, max, minAb);
+        const results = internals.getMatchingStats(stat, min, max, minAb, minYear, maxYear);
         const count = results.length;
 
         if (!minCount || count < minCount) {
             minCount = count;
             minStat = stat;
+            minResults = results;
         }
     });
 
@@ -163,11 +165,10 @@ module.exports = (req, res) => {
     const splitStats = firstStat.params.split(',');
     const min = +splitStats[0];
     const max = +splitStats[1];
-    const results = internals.getMatchingStats(firstStat.stat, min, max, minAb, minYear, maxYear);
 
     // loop thru each match for first stat
     let count = 0;
-    results.forEach((id) => {
+    minResults.forEach((id) => {
 
         if (count > 99) return; // max 100 results for now
 

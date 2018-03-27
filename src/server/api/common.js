@@ -56,7 +56,7 @@ const getIndexFromId =  (namesArray, id) => {
 internals.formatPercentageStat = (stat) => {
 
     if (!stat.includes('.')) {
-        console.warn('invalid stat passed to Common.formatPercentageStat', stat)
+        return '0.000';
     }
 
     if (stat[0] === '0') {
