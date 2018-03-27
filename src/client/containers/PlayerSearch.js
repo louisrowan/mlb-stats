@@ -165,10 +165,18 @@ class PlayerSearch extends React.Component {
         const panes = [];
 
         if (activePlayerBatting.length) {
-            panes.push({ menuItem: 'Batting', render: () => <Tab.Pane><BattingStatsTable statlineArray={activePlayerBatting} /></Tab.Pane> });
+            panes.push({ menuItem: 'Batting', render: () =>
+                <Tab.Pane>
+                    <BattingStatsTable statlineArray={activePlayerBatting} />
+                </Tab.Pane>
+            });
         }
         if (activePlayerPitching.length) {
-            panes.push({ menuItem: 'Pitching', render: () => <Tab.Pane><BattingStatsTable statlineArray={activePlayerPitching} /></Tab.Pane> });
+            panes.push({ menuItem: 'Pitching', render: () =>
+                <Tab.Pane>
+                    <BattingStatsTable statlineArray={activePlayerPitching} />
+                </Tab.Pane>
+            });
         }
 
         return (
