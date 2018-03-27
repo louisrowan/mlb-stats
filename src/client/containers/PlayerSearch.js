@@ -5,7 +5,8 @@ const {
     Button,
     Card,
     Container,
-    Input
+    Input,
+    Tab
 } = require ('semantic-ui-react');
 
 
@@ -25,7 +26,7 @@ const PlayerListItem = (props) => {
     const { handleActivePlayerChange} = props;
 
     return (
-        <Card id={id} onClick={() => handleActivePlayerChange(id)}>
+        <Card id={id} onClick={() => handleActivePlayerChange(id, positions)}>
             <Card.Content>
                 <Card.Header>{fullName}</Card.Header>
             </Card.Content>
@@ -52,7 +53,8 @@ class PlayerSearch extends React.Component {
 
         this.state = {
             players: [],
-            activePlayer: [],
+            activePlayerBatting: [],
+            activePlayerPitching: [],
             searchTerm: ''
         }
 
@@ -75,20 +77,38 @@ class PlayerSearch extends React.Component {
         this.setState({ searchTerm });
     }
 
-    handleActivePlayerChange (playerId) {
+    handleActivePlayerChange (playerId, positions) {
+
+        this.setState({
+            activePlayerBatting: [],
+            activePlayerPitching: []
+        });
 
         Axios.get('/api/players/' + playerId + '/batting')
             .then(res => {
 
-                this.setState({ activePlayer: res.data, searchTerm: '' });
+                this.setState({
+                    activePlayerBatting: res.data,
+                    searchTerm: ''
+                });
             })
             .catch(err => console.log('err getting batting data', err));
+
+        Axios.get('/api/players/' + playerId + '/pitching')
+            .then(res => {
+
+                this.setState({
+                    activePlayerPitching: res.data,
+                    searchTerm: ''
+                });
+            })
+            .catch(err => console.log('err getting pitching data', err));
     }
 
 
     render () {
 
-        const { activePlayer, players, searchTerm } = this.state;
+        const { activePlayerBatting, activePlayerPitching, players, searchTerm } = this.state;
 
         const splitTerm = searchTerm ? searchTerm.toLowerCase().split(' ').filter((t) => t != "") : [];
 
@@ -142,6 +162,14 @@ class PlayerSearch extends React.Component {
         }) : '';
 
 
+        const panes = [];
+
+        if (activePlayerBatting.length) {
+            panes.push({ menuItem: 'Batting', render: () => <Tab.Pane><BattingStatsTable statlineArray={activePlayerBatting} /></Tab.Pane> });
+        }
+        if (activePlayerPitching.length) {
+            panes.push({ menuItem: 'Pitching', render: () => <Tab.Pane><BattingStatsTable statlineArray={activePlayerPitching} /></Tab.Pane> });
+        }
 
         return (
             <Container fluid style={{ overflow: 'auto' }}>
@@ -154,8 +182,8 @@ class PlayerSearch extends React.Component {
             { players.length > 0 && searchTerm.length > 2 &&
                 <Card.Group>{filter}</Card.Group>
             }
-            { activePlayer.length > 0 &&
-                <BattingStatsTable statlineArray={activePlayer} />
+            { activePlayerBatting.length > 0 &&
+                <Tab panes={panes} />
             }
             </Container>
         )

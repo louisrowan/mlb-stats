@@ -3,6 +3,7 @@
 const { expect } = require('code');
 const { describe, it } = exports.lab = require('lab').script();
 
+const Data = require('../../../src/server/api/data');
 const Common = require('../../../src/server/api/common');
 
 
@@ -30,7 +31,7 @@ const internals = {
         '0.286',
         '0.579'
     ],
-    namesFile: Common.readNamesFile()
+    namesFile: Data.NamesFile
 }
 
 
