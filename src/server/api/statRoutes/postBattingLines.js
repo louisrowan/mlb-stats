@@ -3,9 +3,8 @@
 const Fs = require('fs');
 const Path = require('path');
 
-const BattingLinesFile = Path.resolve(__dirname, '../data/formattedBatting.csv');
-
 const Common = require('../common');
+const Data = require('../data');
 
 
 
@@ -122,32 +121,29 @@ module.exports = (req, res) => {
     const maxAge = +payload.maxAge || 100;
 
     const battingLines = [];
-    const namesFile = Common.readNamesFile();
 
-
-    // read in batting lines file for later use
-    const rawBattingLinesFile = Fs.readFileSync(BattingLinesFile, 'utf-8').split('\n');
-    const formattedBattingLines = rawBattingLinesFile.map((line) => line.split(','));
-
-
+    const namesFile = Data.NamesFile;
+    const formattedBattingLines = Data.BattingLinesFile;
 
     // prepare stat params
     const firstStat = {};
     const additionalMatches = [];
     let minCount;
     let minStat = '';
+    let minResults = [];
     Object.keys(stats).forEach((stat) => {
 
         const splitStats = stats[stat].split(',');
         const min = +splitStats[0];
         const max = +splitStats[1];
 
-        const results = internals.getMatchingStats(stat, min, max, minAb);
+        const results = internals.getMatchingStats(stat, min, max, minAb, minYear, maxYear);
         const count = results.length;
 
         if (!minCount || count < minCount) {
             minCount = count;
             minStat = stat;
+            minResults = results;
         }
     });
 
@@ -169,11 +165,10 @@ module.exports = (req, res) => {
     const splitStats = firstStat.params.split(',');
     const min = +splitStats[0];
     const max = +splitStats[1];
-    const results = internals.getMatchingStats(firstStat.stat, min, max, minAb, minYear, maxYear);
 
     // loop thru each match for first stat
     let count = 0;
-    results.forEach((id) => {
+    minResults.forEach((id) => {
 
         if (count > 99) return; // max 100 results for now
 

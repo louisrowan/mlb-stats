@@ -1,16 +1,26 @@
 'use strict';
 
-const Fs = require('fs');
-const Path = require('path');
 const _ = require('lodash');
-
-const NamesCSV = Path.resolve(__dirname, './data/names.csv');
-
-
 
 const internals = {};
 
-internals.getIndexFromId = (namesArray, id) => {
+
+// @purpose
+// take in array of player info and a playerId, where playerId is in first position, recursively find player info from a given playerId
+// @params
+// namesArray: [ 'bondeje01',
+//   'Jeremy',
+//   'Bonderman',
+//   'Jeremy Bonderman',
+//   '2003-04-02',
+//   '2013-09-21',
+//   'P',
+//   'Detroit Tigers:DET-Seattle Mariners:SEA',
+//   '1982'
+// ]
+// id: bondsba01
+// @return: int or error
+const getIndexFromId =  (namesArray, id) => {
 
     const length = namesArray.length;
 
@@ -30,17 +40,23 @@ internals.getIndexFromId = (namesArray, id) => {
     }
 
     if (namesArray[midpoint][0] > id) {
-        return internals.getIndexFromId(namesArray.slice(0, midpoint), id);
+        return getIndexFromId(namesArray.slice(0, midpoint), id);
     }
     else {
-        return midpoint + internals.getIndexFromId(namesArray.slice(midpoint, length), id);
+        return midpoint + getIndexFromId(namesArray.slice(midpoint, length), id);
     }
 }
 
+
+// @purpose
+// take in percentage stat like OBP and properly format with corrent # of decimal places
+// @params
+// stat: .30
+// @return formatted string .300
 internals.formatPercentageStat = (stat) => {
 
     if (!stat.includes('.')) {
-        console.warn('invalid stat passed to Common.formatPercentageStat', stat)
+        return '0.000';
     }
 
     if (stat[0] === '0') {
@@ -51,45 +67,70 @@ internals.formatPercentageStat = (stat) => {
 
 
 
+// @purpose
+// take in array of playerIds and find index of a select id
+// @params
+// array: [aardsda01]
+// id: bondsba01
+// @return
+// int or error
+// const findStatLineById = (array, id) => {
 
-const readNamesFile = () => {
+//     const length = array.length;
+//     if (length === 1) {
+//         if (array[0] === id) {
+//             return 0;
+//         }
+//         else {
+//             console.error('ID not found:', id)
+//             return new Error('id not found', id);
+//         }
+//     }
 
-    const file = Fs.readFileSync(NamesCSV, 'utf-8').split('\n');
-    return file.map((line) => line.split(','));
-};
+//     const midpoint = Math.floor(length / 2);
 
-
-
-
-const findBattingLineById = (array, id) => {
-
-    const length = array.length;
-    if (length === 1) {
-        if (array[0] === id) {
-            return 0;
-        }
-        else {
-            console.error('ID not found:', id)
-            return new Error('id not found', id);
-        }
-    }
-
-    const midpoint = Math.floor(length / 2);
-
-    if (array[midpoint] === id) {
-        return midpoint;
-    }
-    if (array[midpoint] > id) {
-        return findBattingLineById(array.slice(0, midpoint), id);
-    }
-    else {
-        return midpoint + findBattingLineById(array.slice(midpoint, length), id);
-    }
-}
+//     if (array[midpoint] === id) {
+//         return midpoint;
+//     }
+//     if (array[midpoint] > id) {
+//         return findStatLineById(array.slice(0, midpoint), id);
+//     }
+//     else {
+//         return midpoint + findStatLineById(array.slice(midpoint, length), id);
+//     }
+// }
 
 
+// @purpose
+// find index of a full batting line from a given playerId and year
+// @params
+// battingLines: [ 'suzukic01',
+//   '2001',
+//   'SEA',
+//   '157',
+//   '692',
+//   '127',
+//   '242',
+//   '34',
+//   '8',
+//   '8',
+//   '69',
+//   '56',
+//   '14',
+//   '30',
+//   '53',
+//   '8',
+//   '4',
+//   '0.35',
+//   '0.381',
+//   '0.457',
+//   '0.838'
+// ]
+// id: suzukic01
+// year: 2004
+// @return
+// int or error
 const findBattingLineByIdYear = (battingLines, id, year) => {
-
 
     const length = battingLines.length;
     if (length === 1) {
@@ -116,10 +157,39 @@ const findBattingLineByIdYear = (battingLines, id, year) => {
     }
 }
 
+
+// @purpose
+// format a given battingLine array into a formatted battingLine object
+// @params
+// data: [ 'nixontr01',
+//   '2008',
+//   'NYN',
+//   '11',
+//   '35',
+//   '2',
+//   '6',
+//   '1',
+//   '0',
+//   '1',
+//   '1',
+//   '1',
+//   '0',
+//   '6',
+//   '9',
+//   '0',
+//   '0',
+//   '0.171',
+//   '0.293',
+//   '0.286',
+//   '0.579'
+// ]
+// namesFile: file with id/name mapping
+// @return
+// formatted battingLine object
 const formatBattingData = (data, namesFile) => {
 
     const id = data[0];
-    const index = internals.getIndexFromId(namesFile, id);
+    const index = getIndexFromId(namesFile, id);
     const year = data[1];
     const birthYear = namesFile[index][8];
 
@@ -151,9 +221,44 @@ const formatBattingData = (data, namesFile) => {
 }
 
 
+const formatPitchingData = (data, namesFile) => {
+
+    const id = data[0];
+    const index = getIndexFromId(namesFile, id);
+    const year = data[1];
+    const birthYear = namesFile[index][8];
+
+    const res = {};
+    res.name = namesFile[index][3];
+    res.age = +year - +birthYear;
+    res.year = +year;
+    res.teamId = data[2];
+    res.w = +data[3] || 0;
+    res.l = +data[4] || 0;
+    res.g = +data[5] || 0;
+    res.gs = +data[6] || 0;
+    res.cg = +data[7] || 0;
+    res.sho = +data[8] || 0;
+    res.sv = +data[9] || 0;
+    res.ip = +data[10] || 0;
+    res.h = +data[11] || 0;
+    res.er = +data[12] || 0;
+    res.hr = +data[13] || 0;
+    res.bb = +data[14] || 0;
+    res.k = +data[15] || 0;
+    res.oba = +data[16] || 0;
+    res.era = +data[17] || 0;
+    res.hbp = +data[18] || 0;
+    res.fip = +data[19] || 0;
+
+    return res;
+}
+
+
 module.exports = {
-    readNamesFile,
-    findBattingLineById,
+    // findStatLineById,
+    getIndexFromId,
     findBattingLineByIdYear,
-    formatBattingData
+    formatBattingData,
+    formatPitchingData
 }
