@@ -49,11 +49,8 @@ internals.findIndex = (statTotals, min, max) => {
 
 internals.getMatchingStats = (stat, min, max, minAb, minYear, maxYear) => {
 
-    const file = Path.resolve(__dirname, `../data/indexedStats/indexed-${stat}.csv`);
-    const raw = Fs.readFileSync(file, 'utf-8');
-    const battingLines = raw.split('\n')
-
-    const statTotals = battingLines.map((line) => +line.split(',')[0]);
+    const indexedData = Data[`Indexed_${stat}_Data`];
+    const statTotals = indexedData.map((line) => +line[0]);
 
     let startIndex;
     try {
@@ -64,24 +61,23 @@ internals.getMatchingStats = (stat, min, max, minAb, minYear, maxYear) => {
     if (startIndex || startIndex === 0) {
         let beginIndex = startIndex;
 
-        while (+statTotals[beginIndex] >= min) {
+        while (statTotals[beginIndex] >= min) {
             --beginIndex;
         }
 
         let endIndex = startIndex;
-        while (+statTotals[endIndex] <= max) {
+        while (statTotals[endIndex] <= max) {
             ++endIndex;
         }
 
-        const results = battingLines.slice(beginIndex + 1, endIndex);
+        const results = indexedData.slice(beginIndex + 1, endIndex);
         const filteredResults = results.filter((result) => {
 
-            const splitResult = result.split(',');
-            const ab = +splitResult[2];
+            const ab = +result[2];
 
             let year;
             try {
-                year = +splitResult[1].split('-')[1];
+                year = +result[1].split('-')[1];
             }
             catch (err) {} // handle undefined
 
@@ -92,7 +88,7 @@ internals.getMatchingStats = (stat, min, max, minAb, minYear, maxYear) => {
             }
             return false;
         });
-        const ids = filteredResults.map((result) => result.split(',')[1]);
+        const ids = filteredResults.map((result) => result[1]);
         return ids;
     }
     return [];
