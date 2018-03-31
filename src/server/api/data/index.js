@@ -40,7 +40,6 @@ internals.readPitchingLinesFile = () => {
 };
 
 
-
 const NamesFile = exports.NamesFile = internals.readNamesFile();
 const BattingLinesFile = exports.BattingLinesFile = internals.readBattingLinesFile();
 const PitchingLinesFile = exports.PitchingLinesFile = internals.readPitchingLinesFile();

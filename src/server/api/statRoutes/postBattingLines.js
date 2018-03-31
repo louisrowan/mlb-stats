@@ -201,6 +201,7 @@ module.exports = (req, res) => {
         }
         catch (err) {
             console.log('error in post batting data', id, err);
+            res.send([]);
         }
     });
 

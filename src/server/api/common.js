@@ -195,6 +195,7 @@ const formatBattingData = (data, namesFile) => {
 
     const res = {};
     res.name = namesFile[index][3];
+    res._id = id;
     res.age = +year - +birthYear;
     res.year = +year;
     res.teamId = data[2];
@@ -230,6 +231,7 @@ const formatPitchingData = (data, namesFile) => {
 
     const res = {};
     res.name = namesFile[index][3];
+    res._id = id;
     res.age = +year - +birthYear;
     res.year = +year;
     res.teamId = data[2];
