@@ -23,14 +23,16 @@ const {
     Checkbox,
     Container,
     Header,
-    Input,
     List,
     Loader,
-    Table,
     Segment
  } = require('semantic-ui-react');
 
+const Common = require('../common');
+
 const BattingStatsTable = require('../components/BattingStatsTable');
+const StatMatchForm = require('../components/StatMatchForm');
+const StatSelectList = require('../components/StatSelectList');
 
 
 const Footer = (props) => {
@@ -55,50 +57,16 @@ class StatQuery extends React.Component {
     };
 
 
-    createPayload = () => {
-
-        const {
-            minAb,
-            minAge,
-            maxAge,
-            minYear,
-            maxYear,
-            stats
-        } = this.props;
-
-        const payload = {
-            stats: {},
-            minAb,
-            minAge,
-            maxAge,
-            minYear,
-            maxYear
-        };
-
-        Object.keys(stats).forEach((stat) => {
-
-            const active = stats[stat].active;
-
-            if (!active) {
-                return;
-            }
-
-            const min = stats[stat].min;
-            const max = +stats[stat].max ? stats[stat].max : 99999;
-
-            if (max > 0) {
-
-                const qs = `${min},${max}`;
-                payload.stats[stat] = qs;
-            }
-        })
-        return payload;
-    };
-
-
     handleSubmit = () => {
 
-        const payload = this.createPayload();
+        const payload = Common.createStatlinePayload({
+            minAb: this.props.minAb,
+            minAge: this.props.minAge,
+            maxAge: this.props.maxAge,
+            minYear: this.props.minYear,
+            maxYear: this.props.maxYear,
+            stats: this.props.stats
+        });
 
         this.props.statqueryUpdateLoading(true);
         Axios.post('/api/stats/battingLines', { payload })
@@ -163,135 +131,30 @@ class StatQuery extends React.Component {
 
         return (
             <Container fluid style={{ overflow: 'auto' }}>
-                <Segment>
-                    <List horizontal>
-                        {Object.keys(stats).map((s) => {
-
-                            const active = stats[s].active;
-
-                            return (
-                                <List.Item key={s}>
-                                    <Checkbox
-                                        checked={active}
-                                        onChange={() => statqueryToggleStatActive(s)}
-                                        label={s}
-                                    />
-                                </List.Item>
-                            )
-                        })}
-                    </List>
-                </Segment>
-                <Table collapsing>
-                    <Table.Body>
-                    <Table.Row>
-                        <Table.Cell>Stat</Table.Cell>
-                        <Table.Cell>Min</Table.Cell>
-                        <Table.Cell>Max</Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>ab</Table.Cell>
-                        <Table.Cell>
-                            <Input
-                                onChange={(e) => statqueryUpdateMinAb(e.target.value)}
-                                type='number'
-                                value={minAb}
-                                min={1}
-                            />
-                        </Table.Cell>
-                        <Table.Cell>N/A</Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>Years</Table.Cell>
-                        <Table.Cell>
-                            <Input
-                                onChange={(e) => statqueryUpdateMinYear(e.target.value)}
-                                type='number'
-                                value={minYear}
-                                min={1891}
-                                max={2016}
-                            />
-                        </Table.Cell>
-                        <Table.Cell>
-                            <Input
-                                onChange={(e) => statqueryUpdateMaxYear(e.target.value)}
-                                type='number'
-                                value={maxYear}
-                                min={1891}
-                                max={2016}
-                            />
-                        </Table.Cell>
-                    </Table.Row>
-                    <Table.Row>
-                        <Table.Cell>Age</Table.Cell>
-                        <Table.Cell>
-                            <Input
-                                onChange={(e) => statqueryUpdateMinAge(e.target.value)}
-                                type='number'
-                                value={minAge}
-                                min={0}
-                                max={100}
-                            />
-                        </Table.Cell>
-                        <Table.Cell>
-                            <Input
-                                onChange={(e) => statqueryUpdateMaxAge(e.target.value)}
-                                type='number'
-                                value={maxAge}
-                                min={0}
-                                max={100}
-                            />
-                        </Table.Cell>
-                    </Table.Row>
-                        {Object.keys(stats).map((s) => {
-
-                            const active = stats[s].active;
-
-                            if (!active) {
-                                return;
-                            }
-
-                            const min = stats[s].min;
-                            const max = stats[s].max;
-
-                            return (
-                            <Table.Row key={s}>
-                                <Table.Cell>
-                                    {s}
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Input
-                                        onChange={(e) => statqueryUpdateStatValue(s, 'min', e.target.value)}
-                                        type='number'
-                                        min={0}
-                                        value={min}
-                                        error={!min}
-                                    />
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Input
-                                        onChange={(e) => statqueryUpdateStatValue(s, 'max', e.target.value)}
-                                        type={+max ? 'number' : 'text'}
-                                        min={0}
-                                        value={+max ? max : 'N/A'}
-                                        />
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <Button
-                                        onClick={(e) => statqueryToggleStatActive(s)}
-                                        icon='cancel'
-                                    />
-                                </Table.Cell>
-                            </Table.Row>
-                            )
-                        })}
-                    </Table.Body>
-                </Table>
+                <StatSelectList
+                    stats={stats}
+                    toggleStatActive={statqueryToggleStatActive}
+                />
+                <StatMatchForm 
+                    minAb={minAb}
+                    updateMinAb={statqueryUpdateMinAb}
+                    minYear={minYear}
+                    updateMinYear={statqueryUpdateMinYear}
+                    maxYear={maxYear}
+                    updateMaxYear={statqueryUpdateMaxYear}
+                    minAge={minAge}
+                    updateMinAge={statqueryUpdateMinAge}
+                    maxAge={maxAge}
+                    updateMaxAge={statqueryUpdateMaxAge}
+                    stats={stats}
+                    updateStatValue={statqueryUpdateStatValue}
+                    toggleStatActive={statqueryToggleStatActive}
+                />
                 <Button 
                     disabled={!this.isButtonEnabled()}
                     onClick={() => this.handleSubmit()}
-                >
-                    Submit
-                </Button>
+                    content='Submit'
+                />
                 <Button onClick={() => statqueryReset()} content='Reset' />
             { loading &&
                 <Segment><Loader active /></Segment>
