@@ -105,7 +105,7 @@ const StatMatchForm = (props) => {
                                 type='number'
                                 min={0}
                                 value={min}
-                                error={!min}
+                                error={!min && min !== 0}
                             />
                         </Table.Cell>
                         <Table.Cell>

@@ -35,7 +35,7 @@ const StatMatchForm = require('../components/StatMatchForm');
 const StatSelectList = require('../components/StatSelectList');
 
 
-const Footer = (props) => {
+const HowTo = (props) => {
 
     return (
         <Segment>
@@ -54,6 +54,12 @@ class StatQuery extends React.Component {
     constructor (props) {
 
         super (props);
+    };
+
+
+    componentDidMount = () => {
+
+        this.props.statqueryReset();
     };
 
 
@@ -94,7 +100,7 @@ class StatQuery extends React.Component {
 
             if (stat.active) {
                 anyActive = true;
-                if (!stat.min) {
+                if (!stat.min && stat.min !== 0) {
                     missingVal = true;
                 }
             }
@@ -150,7 +156,8 @@ class StatQuery extends React.Component {
                     updateStatValue={statqueryUpdateStatValue}
                     toggleStatActive={statqueryToggleStatActive}
                 />
-                <Button 
+                <Button
+                    color='green'
                     disabled={!this.isButtonEnabled()}
                     onClick={() => this.handleSubmit()}
                     content='Submit'
@@ -161,13 +168,14 @@ class StatQuery extends React.Component {
             }
             { hasData && 
                 <Container fluid>
+                    <br />
                     <Header as='h4' content={`Your search contained ${battingLinesArray.length} result${battingLinesArray.length === 1 ? '' : 's'}`} />
                 { battingLinesArray.length > 0 &&
                     <BattingStatsTable statlineArray={battingLinesArray} />
                 }
                 </Container>
             }
-            <Footer />
+            { !hasData && <HowTo /> }
             </Container>
         )
     }

@@ -34,6 +34,19 @@ const StatMatchForm = require('../components/StatMatchForm');
 const StatSelectList = require('../components/StatSelectList');
 
 
+const HowTo = (props) => {
+
+    return (
+        <Segment>
+            <Header as='h3' content='How to Use' />
+            <p>
+                This interface starts with a single batting line and queries for similar lines based on the specified statistics and performance.
+            </p>
+        </Segment>
+    )
+}
+
+
 class FindSimilar extends React.Component {
 
     constructor (props) {
@@ -44,7 +57,7 @@ class FindSimilar extends React.Component {
             lineToMatch: {},
             lineToMatchId: '',
             modalOpen: false,
-            variance: 0
+            variance: 10
         }
     }
 
@@ -93,6 +106,14 @@ class FindSimilar extends React.Component {
             statqueryUpdateStatValue
         } = this.props;
 
+        const hackRound = (num) => { // temp fix until I rewrite to properly label type of stat
+
+            if (num > 2) {
+                return Math.floor(num);
+            }
+            return Math.round(num * 1000)/1000;
+        }
+
         Object.keys(stats).forEach((stat) => {
 
             statqueryToggleStatActive(stat);
@@ -100,8 +121,8 @@ class FindSimilar extends React.Component {
             const min = lineToMatchValue - (lineToMatchValue/variance) || 0;
             const max = lineToMatchValue + (lineToMatchValue/variance);
 
-            statqueryUpdateStatValue(stat, 'min', min);
-            statqueryUpdateStatValue(stat, 'max', max);
+            statqueryUpdateStatValue(stat, 'min', hackRound(min));
+            statqueryUpdateStatValue(stat, 'max', hackRound(max));
         });
     }
 
@@ -119,9 +140,6 @@ class FindSimilar extends React.Component {
         this.props.statqueryUpdateLoading(true);
         Axios.post('/api/stats/battingLines', { payload })
             .then(res => {
-
-                console.log(this.state.lineToMatchId);
-                console.log(res.data);
 
                 const results = res.data.filter((l) => {
 
@@ -174,6 +192,11 @@ class FindSimilar extends React.Component {
                 textAlign='center'
                 content='Select Variance Level'
             />
+            <Header
+                as='h5'
+                textAlign='center'
+                content='Note: Smaller variance will yield fewer matching results'
+            />
             <Modal.Content>
                 <Header
                     as='h3'
@@ -182,7 +205,7 @@ class FindSimilar extends React.Component {
                 />
                 <Input
                     fluid
-                    min={0}
+                    min={1}
                     max={50}
                     type='range'
                     onChange={(e) => this.setState({ variance: e.target.value })}
@@ -190,6 +213,7 @@ class FindSimilar extends React.Component {
                 />
                 <Button
                     fluid
+                    color='green'
                     onClick={this.handleModalClose}
                     content='Submit'
                 />
@@ -222,6 +246,7 @@ class FindSimilar extends React.Component {
                         toggleStatActive={statqueryToggleStatActive}
                     />
                     <Button
+                        color='green'
                         onClick={() => this.handleSubmit()}
                         content='Submit'
                     />
@@ -230,6 +255,7 @@ class FindSimilar extends React.Component {
                 }
                 { hasMatchingData && 
                     <Container fluid>
+                    <br />
                         <Header
                             as='h4'
                             content={`Your search contained ${battingLinesArray.length} result${battingLinesArray.length === 1 ? '' : 's'}`}
@@ -239,17 +265,9 @@ class FindSimilar extends React.Component {
                     }
                     </Container>
                 }
+                { !hasMatchingData && <HowTo /> }
                     </Container>
-                }
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
+            }
             </Container>
         )
     }
