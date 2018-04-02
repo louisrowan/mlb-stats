@@ -4,7 +4,9 @@ const {
     Button,
     Container,
     Header,
+    Input,
     Loader,
+    Modal,
     Segment,
     Table
 } = require('semantic-ui-react');
@@ -40,7 +42,9 @@ class FindSimilar extends React.Component {
 
         this.state = {
             lineToMatch: {},
-            lineToMatchId: ''
+            lineToMatchId: '',
+            modalOpen: false,
+            variance: 0
         }
     }
 
@@ -60,10 +64,9 @@ class FindSimilar extends React.Component {
             .then(res => {
 
                 this.setState({
-                    lineToMatch: res.data
+                    lineToMatch: res.data,
+                    modalOpen: true
                 });
-
-                this.handleOriginalData(res.data);
             })
             .catch(err => {
 
@@ -71,7 +74,18 @@ class FindSimilar extends React.Component {
             })
     }
 
-    handleOriginalData = (lineToMatch) => {
+    handleModalClose = () => {
+
+        this.setState({
+            modalOpen: false
+        });
+
+        this.handleOriginalData();
+    }
+
+    handleOriginalData = () => {
+
+        const { lineToMatch, variance } = this.state;
 
         const {
             stats,
@@ -83,8 +97,8 @@ class FindSimilar extends React.Component {
 
             statqueryToggleStatActive(stat);
             const lineToMatchValue = lineToMatch[stat];
-            const min = lineToMatchValue - (lineToMatchValue/10) || 0;
-            const max = lineToMatchValue + (lineToMatchValue/10);
+            const min = lineToMatchValue - (lineToMatchValue/variance) || 0;
+            const max = lineToMatchValue + (lineToMatchValue/variance);
 
             statqueryUpdateStatValue(stat, 'min', min);
             statqueryUpdateStatValue(stat, 'max', max);
@@ -125,7 +139,11 @@ class FindSimilar extends React.Component {
 
     render() {
 
-        const { lineToMatch } = this.state;
+        const {
+            lineToMatch,
+            modalOpen,
+            variance
+        } = this.state;
 
         const {
             battingLinesArray,
@@ -149,9 +167,39 @@ class FindSimilar extends React.Component {
 
         const hasData = Object.keys(lineToMatch).length > 0;
 
+        const modal = (
+        <Modal open={modalOpen}>
+            <Header
+                as='h3'
+                textAlign='center'
+                content='Select Variance Level'
+            />
+            <Modal.Content>
+                <Header
+                    as='h3'
+                    textAlign='center'
+                    content={`${variance} %`}
+                />
+                <Input
+                    fluid
+                    min={0}
+                    max={50}
+                    type='range'
+                    onChange={(e) => this.setState({ variance: e.target.value })}
+                    value={variance}
+                />
+                <Button
+                    fluid
+                    onClick={this.handleModalClose}
+                    content='Submit'
+                />
+            </Modal.Content>
+        </Modal>)
+
         return (
             <Container fluid>
-            {hasData &&
+            { modalOpen && modal }
+            { hasData &&
                 <Container fluid>
                     <BattingStatsTable statlineArray={[lineToMatch]} />
                     <StatSelectList
