@@ -9,7 +9,7 @@ const GetPlayerBattingYear = require('./playerRoutes/getPlayerBattingYear');
 const GetPlayerPitching = require('./playerRoutes/getPlayerPitching');
 const PostBattingLines = require('./statRoutes/postBattingLines');
 
-const Logger = require('./logs/logger');
+const Logger = require('./logger/logger');
 
 
 Routes.get('/players', GetPlayers);
