@@ -1,11 +1,7 @@
 'use strict';
 
-const Fs = require('fs');
-const Path = require('path');
-
 const Common = require('../common');
 const Data = require('../data');
-
 
 
 module.exports = (req, res) => {

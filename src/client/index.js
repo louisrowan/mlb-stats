@@ -9,6 +9,7 @@ const {
 const { Provider } = require('react-redux');
 const Store = require('./redux/store');
 
+const FindSimilar = require('./containers/FindSimilar');
 const Footer = require('./containers/Footer');
 const Home = require('./containers/Home');
 const NavBar = require('./containers/NavBar');
@@ -25,6 +26,7 @@ const App = () => {
                 <div>
                     <Route path='/' component={NavBar} />
                     <Route path='/' exact component={Home} />
+                    <Route path='/similar' component={FindSimilar} />
                     <Route path='/query' component={StatQuery} />
                     <Route path='/playerSearch' component={PlayerSearch} />
                     <Route path='/' component={Footer} />

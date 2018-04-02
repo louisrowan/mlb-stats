@@ -1,6 +1,8 @@
 const React = require('react');
-
+const { Link } = require('react-router-dom');
 const { Icon, Table } = require('semantic-ui-react');
+
+const BattingStatsRow = require('./BattingStatsRow');
 
 
 class BattingStatsTable extends React.Component {
@@ -64,6 +66,10 @@ class BattingStatsTable extends React.Component {
                     <Table.Row>
                         {Object.keys(statlineArray[0]).map((header) => {
 
+                            if (header[0] === '_') {
+                                return;
+                            }
+
                             const isSorted = sortedStat === header;
                             const isSortedDesc = (isSorted && sortedDirection === 'desc');
 
@@ -87,21 +93,7 @@ class BattingStatsTable extends React.Component {
                     {statlineArray.map((year, index) => {
 
                         return (
-                            <Table.Row key={index}>
-                                {Object.keys(year).map((stat) => {
-
-                                    const isSorted = sortedStat === stat;
-
-                                    return (
-                                        <Table.Cell
-                                            key={stat}
-                                            positive={isSorted}
-                                        >
-                                            {year[stat]}
-                                        </Table.Cell>
-                                    )
-                                })}
-                            </Table.Row>
+                            <BattingStatsRow key={index} year={year} sortedStat={sortedStat} />
                         )
                     })}
                 </Table.Body>

@@ -1,3 +1,5 @@
+const Common = require('./common');
+
 // actions and action creators
 const STATQUERY_UPDATE_LOADING = 'STATQUERY_UPDATE_LOADING';
 export const statqueryUpdateLoading = (value) => {
@@ -98,14 +100,11 @@ const initialState = {
     maxAge: 100,
     maxYear: 2016,
     minYear: 1891,
-    statNames: ['hr', 'rbi', 'sb', 'h', 'avg', 'obp', 'slg', 'ops'],
+    statNames: Common.statNames.slice(0),
     stats: {}
 };
 
-initialState.statNames.forEach((stat) => {
-
-    initialState.stats[stat] = { stat: stat, min: '', max: '', active: false }
-});
+Common.formatStatNames(initialState);
 
 
 
@@ -206,6 +205,4 @@ export const reducer = (state = initialState, action) => {
         default:
             return state;
     }
-
-    return state;
 }

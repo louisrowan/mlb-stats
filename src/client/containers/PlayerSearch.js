@@ -26,7 +26,7 @@ const PlayerListItem = (props) => {
     const { handleActivePlayerChange} = props;
 
     return (
-        <Card id={id} onClick={() => handleActivePlayerChange(id, positions)}>
+        <Card id={id} onClick={() => handleActivePlayerChange(id)}>
             <Card.Content>
                 <Card.Header>{fullName}</Card.Header>
             </Card.Content>
@@ -47,9 +47,9 @@ const PlayerListItem = (props) => {
 
 class PlayerSearch extends React.Component {
 
-    constructor() {
+    constructor (props) {
 
-        super()
+        super(props)
 
         this.state = {
             players: [],
@@ -58,15 +58,34 @@ class PlayerSearch extends React.Component {
             searchTerm: ''
         }
 
+        this.handleSearchTermChange = this.handleSearchTermChange.bind(this);
+        this.handleActivePlayerChange = this.handleActivePlayerChange.bind(this);
+    }
+
+    componentDidMount () {
+
+        this.getInitialData();
+
+        if (this.props.location.search) {
+            this.handleQueryParams();
+        }
+    }
+
+    getInitialData () {
+
         Axios.get('/api/players')
             .then(res => {
 
                 this.setState({ players: res.data })
             })
             .catch(err => console.log('err'));
+    }
 
-        this.handleSearchTermChange = this.handleSearchTermChange.bind(this);
-        this.handleActivePlayerChange = this.handleActivePlayerChange.bind(this);
+
+    handleQueryParams () {
+
+        const query = this.props.location.search.slice(1);
+        this.handleActivePlayerChange(query);
     }
 
 
@@ -77,7 +96,7 @@ class PlayerSearch extends React.Component {
         this.setState({ searchTerm });
     }
 
-    handleActivePlayerChange (playerId, positions) {
+    handleActivePlayerChange (playerId) {
 
         this.setState({
             activePlayerBatting: [],
