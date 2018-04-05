@@ -105,26 +105,26 @@ const writePitchingFile = () => {
     sortedArray.forEach((l) => {
 
         const lineAsArray = [];
-        lineAsArray.push(l.id);
-        lineAsArray.push(l.year);
-        lineAsArray.push(l.teamId);
-        lineAsArray.push(l.w);
-        lineAsArray.push(l.l);
-        lineAsArray.push(l.g);
-        lineAsArray.push(l.gs);
-        lineAsArray.push(l.cg);
-        lineAsArray.push(l.sho);
-        lineAsArray.push(l.sv);
-        lineAsArray.push(l.ip);
-        lineAsArray.push(l.h);
-        lineAsArray.push(l.er);
-        lineAsArray.push(l.hr);
-        lineAsArray.push(l.bb);
-        lineAsArray.push(l.k);
-        lineAsArray.push(l.oba);
-        lineAsArray.push(l.era);
-        lineAsArray.push(l.hbp);
-        lineAsArray.push(l.fip);
+        lineAsArray.push(l.id); // 0
+        lineAsArray.push(l.year); // 1
+        lineAsArray.push(l.teamId); // 2
+        lineAsArray.push(l.w); // 3
+        lineAsArray.push(l.l); // 4
+        lineAsArray.push(l.g); // 5
+        lineAsArray.push(l.gs); // 6
+        lineAsArray.push(l.cg); // 7
+        lineAsArray.push(l.sho); // 8
+        lineAsArray.push(l.sv); // 9
+        lineAsArray.push(l.ip); // 10
+        lineAsArray.push(l.h); // 11
+        lineAsArray.push(l.er); // 12
+        lineAsArray.push(l.hr); // 13
+        lineAsArray.push(l.bb); // 14
+        lineAsArray.push(l.k); // 15
+        lineAsArray.push(l.oba); // 16
+        lineAsArray.push(l.era); // 17
+        lineAsArray.push(l.hbp); // 18
+        lineAsArray.push(l.fip); // 19
 
         const asString = lineAsArray.join(',');
         file += asString + '\n';

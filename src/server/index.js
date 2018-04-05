@@ -1,6 +1,7 @@
 'use strict';
 
 require('./api/data'); // setup data
+require('./redis'); // setup redis
 
 const BodyParser = require('body-parser');
 const Express = require('express');
