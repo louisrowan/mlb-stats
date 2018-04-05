@@ -1,11 +1,8 @@
 'use strict';
 
-const Fs = require('fs');
-const Path = require('path');
-
 const Common = require('../common');
 const Data = require('../data');
-
+const StatCommon = require('./statCommon');
 
 
 const internals = {};
@@ -19,80 +16,80 @@ internals.findBattingLine = (id) => {
 }
 
 
-internals.findIndex = (statTotals, min, max) => {
+// internals.findIndex = (statTotals, min, max) => {
 
-    const length = statTotals.length;
+//     const length = statTotals.length;
 
-    if (length === 1) {
-        if (statTotals[0] >= min && statTotals[0] <= max) {
-            return 0;
-        }
-        else {
-            throw new Error(`no results found between ${min} and ${max}`);
-        }
-    }
+//     if (length === 1) {
+//         if (statTotals[0] >= min && statTotals[0] <= max) {
+//             return 0;
+//         }
+//         else {
+//             throw new Error(`no results found between ${min} and ${max}`);
+//         }
+//     }
 
-    const midpoint = Math.floor(length / 2);
+//     const midpoint = Math.floor(length / 2);
 
-    if (statTotals[midpoint] >= min && statTotals[midpoint] <= max) {
-        return midpoint;
-    }
+//     if (statTotals[midpoint] >= min && statTotals[midpoint] <= max) {
+//         return midpoint;
+//     }
 
-    if (statTotals[midpoint] > max) {
-        return internals.findIndex(statTotals.slice(0, midpoint), min, max);
-    }
-    else {
-        return midpoint + internals.findIndex(statTotals.slice(midpoint, length), min, max);
-    }
-}
+//     if (statTotals[midpoint] > max) {
+//         return internals.findIndex(statTotals.slice(0, midpoint), min, max);
+//     }
+//     else {
+//         return midpoint + internals.findIndex(statTotals.slice(midpoint, length), min, max);
+//     }
+// }
 
 
-internals.getMatchingStats = (stat, min, max, minAb, minYear, maxYear) => {
+// internals.getMatchingStats = (stat, min, max, minAb, minYear, maxYear) => {
 
-    const indexedData = Data[`Indexed_${stat}_Data`];
-    const statTotals = indexedData.map((line) => +line[0]);
+//     const indexedData = Data[`Indexed_Batting_${stat}_Data`];
+//     const statTotals = indexedData.map((line) => +line[0]);
 
-    let startIndex;
-    try {
-        startIndex = internals.findIndex(statTotals, min, max);
-    }
-    catch (err) {}
+//     let startIndex;
+//     try {
+//         startIndex = internals.findIndex(statTotals, min, max);
+//     }
+//     catch (err) {}
 
-    if (startIndex || startIndex === 0) {
-        let beginIndex = startIndex;
+//     if (startIndex || startIndex === 0) {
+//         let beginIndex = startIndex;
 
-        while (statTotals[beginIndex] >= min) {
-            --beginIndex;
-        }
+//         while (statTotals[beginIndex] >= min) {
+//             --beginIndex;
+//         }
 
-        let endIndex = startIndex;
-        while (statTotals[endIndex] <= max) {
-            ++endIndex;
-        }
+//         let endIndex = startIndex;
+//         while (statTotals[endIndex] <= max) {
+//             ++endIndex;
+//         }
 
-        const results = indexedData.slice(beginIndex + 1, endIndex);
-        const filteredResults = results.filter((result) => {
+//         const results = indexedData.slice(beginIndex + 1, endIndex);
+//         const filteredResults = results.filter((result) => {
 
-            const ab = +result[2];
+//             const ab = +result[2];
 
-            let year;
-            try {
-                year = +result[1].split('-')[1];
-            }
-            catch (err) {} // handle undefined
+//             let year;
+//             try {
+//                 year = +result[1].split('-')[1];
+//             }
+//             catch (err) {} // handle undefined
 
-            if (ab >= minAb &&
-                year >= minYear &&
-                year <= maxYear) {
-                return true;
-            }
-            return false;
-        });
-        const ids = filteredResults.map((result) => result[1]);
-        return ids;
-    }
-    return [];
-}
+//             if (ab >= minAb &&
+//                 year >= minYear &&
+//                 year <= maxYear) {
+//                 return true;
+//             }
+//             return false;
+//         });
+//         const ids = filteredResults.map((result) => result[1]);
+//         return ids;
+//     }
+//     return [];
+// }
 
 
 module.exports = (req, res) => {
@@ -121,46 +118,16 @@ module.exports = (req, res) => {
     const namesFile = Data.NamesFile;
     const formattedBattingLines = Data.BattingLinesFile;
 
-    // prepare stat params
-    const firstStat = {};
-    const additionalMatches = [];
-    let minCount;
-    let minStat = '';
-    let minResults = [];
-    Object.keys(stats).forEach((stat) => {
-
-        const splitStats = stats[stat].split(',');
-        const min = +splitStats[0];
-        const max = +splitStats[1];
-
-        const results = internals.getMatchingStats(stat, min, max, minAb, minYear, maxYear);
-        const count = results.length;
-
-        if (!minCount || count < minCount) {
-            minCount = count;
-            minStat = stat;
-            minResults = results;
-        }
+    const {
+        minResults,
+        additionalMatches
+    } = StatCommon.getMinimumStatMatches({
+        stats,
+        minYear,
+        maxYear,
+        minAb,
+        type: 'Batting'
     });
-
-    Object.keys(stats).forEach((stat) => {
-
-        if (stat === minStat) {
-            firstStat.stat = stat;
-            firstStat.params = stats[stat];
-        }
-        else {
-            additionalMatches.push({
-                stat: stat,
-                params: stats[stat]
-            });
-        }
-    })
-
-    // get stats for first stat
-    const splitStats = firstStat.params.split(',');
-    const min = +splitStats[0];
-    const max = +splitStats[1];
 
     // loop thru each match for first stat
     let count = 0;
