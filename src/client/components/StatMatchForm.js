@@ -50,7 +50,6 @@ const StatMatchForm = (props) => {
                         type='number'
                         value={minYear}
                         min={1891}
-                        max={2016}
                     />
                 </Table.Cell>
                 <Table.Cell>
@@ -59,7 +58,6 @@ const StatMatchForm = (props) => {
                         type='number'
                         value={maxYear}
                         min={1891}
-                        max={2016}
                     />
                 </Table.Cell>
             </Table.Row>
@@ -71,7 +69,6 @@ const StatMatchForm = (props) => {
                         type='number'
                         value={minAge}
                         min={0}
-                        max={100}
                     />
                 </Table.Cell>
                 <Table.Cell>
@@ -80,7 +77,6 @@ const StatMatchForm = (props) => {
                         type='number'
                         value={maxAge}
                         min={0}
-                        max={100}
                     />
                 </Table.Cell>
             </Table.Row>

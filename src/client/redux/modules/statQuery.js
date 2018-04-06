@@ -209,7 +209,7 @@ export const reducer = (state = initialState, action) => {
         case STATQUERY_UPDATE_MAX_YEAR:
             return {
                 ...state,
-                maxYear: action.value
+                maxYear: action.value < 2016 ? action.value : 2016
             }
         case STATQUERY_UPDATE_MIN_AGE:
             return {
@@ -219,7 +219,7 @@ export const reducer = (state = initialState, action) => {
         case STATQUERY_UPDATE_MAX_AGE:
             return {
                 ...state,
-                maxAge: action.value
+                maxAge: action.value < 100 ? action.value : 100
             }
         case STATQUERY_TOGGLE_STAT_ACTIVE:
             return toggleStatActiveReducer(state, action);
