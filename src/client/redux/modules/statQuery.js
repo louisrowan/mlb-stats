@@ -108,7 +108,7 @@ const initialState = {
     maxAge: 100,
     maxYear: 2016,
     minYear: 1891,
-    statNames: [],
+    statNames: {},
     stats: {},
     type: ''
 };
@@ -119,8 +119,10 @@ const initialState = {
 
 const toggleStatActiveReducer = (state, action) => {
 
+    console.log('in toggle stat active reducer', state, action);
+
     const newStats = {};
-    state.statNames.forEach((statName) => {
+    Object.keys(state.statNames).forEach((statName) => {
         const newStat = { ...state.stats[statName]};
         if (newStat.stat === action.stat) {
             newStat.active = !newStat.active;
@@ -138,7 +140,7 @@ const toggleStatActiveReducer = (state, action) => {
 const updateStatValueReducer = (state, action) => {
 
     const newStats = {};
-    state.statNames.forEach((statName) => {
+    Object.keys(state.statNames).forEach((statName) => {
         const newStat = { ...state.stats[statName]};
         if (newStat.stat === action.stat) {
             newStat[action.minMax] = action.value;
@@ -159,8 +161,7 @@ export const reducer = (state = initialState, action) => {
 
     switch (action.type) {
         case STATQUERY_UPDATE_TYPE:
-            const statNames = action.value === 'Batting' ? Common.battingStatNames.slice(0) : Common.pitchingStatNames.slice(0);
-            const stats = Common.formatStats(state, action.value);
+            const { statNames, stats } = Common.formatStats(state, action.value);
             return {
                 ...state,
                 type: action.value,

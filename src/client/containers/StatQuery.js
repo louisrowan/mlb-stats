@@ -103,8 +103,16 @@ class StatQuery extends React.Component {
 
             if (stat.active) {
                 anyActive = true;
-                if (!stat.min && stat.min !== 0) {
-                    missingVal = true;
+
+                if (stat.direction === 'positive') {
+                    if (!stat.min && stat.min !== 0) {
+                        missingVal = true;
+                    }
+                }
+                else {
+                    if (!stat.max) {
+                        missingVal = true;
+                    }
                 }
             }
         })

@@ -86,14 +86,29 @@ const StatMatchForm = (props) => {
             </Table.Row>
                 {Object.keys(stats).map((s) => {
 
-                    const active = stats[s].active;
+                    const stat = stats[s];
+                    const active = stat.active;
+                    const direction = stat.direction;
+                    const type = stat.type;
 
                     if (!active) {
                         return;
                     }
 
-                    const min = stats[s].min;
-                    const max = stats[s].max;
+                    const min = stat.min;
+                    const max = stat.max;
+
+                    const minVal = min ? min :
+                        direction === 'positive' ? 0 : 'N/A';
+
+                    const maxVal = max ? max :
+                        direction === 'negative' ? 0 : 'N/A';
+
+
+                    const error = direction === 'positive' ?
+                        !minVal : !maxVal;
+
+                    const step = type === 'count' ? 1 : .1;
 
                     return (
                     <Table.Row key={s}>
@@ -103,18 +118,21 @@ const StatMatchForm = (props) => {
                         <Table.Cell>
                             <Input
                                 onChange={(e) => updateStatValue(s, 'min', e.target.value)}
-                                type='number'
+                                type={+minVal || minVal === 0 ? 'number' : 'text'}
                                 min={0}
-                                value={min}
-                                error={!min && min !== 0}
+                                step={step}
+                                value={minVal}
+                                error={error && direction === 'positive'}
                             />
                         </Table.Cell>
                         <Table.Cell>
                             <Input
                                 onChange={(e) => updateStatValue(s, 'max', e.target.value)}
-                                type={+max ? 'number' : 'text'}
+                                type={+maxVal || maxVal === 0 ? 'number' : 'text'}
                                 min={0}
-                                value={+max ? max : 'N/A'}
+                                step={step}
+                                value={maxVal}
+                                error={error && direction === 'negative'}
                                 />
                         </Table.Cell>
                         <Table.Cell>
