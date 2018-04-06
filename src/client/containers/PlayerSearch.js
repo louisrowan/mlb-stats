@@ -229,8 +229,6 @@ class PlayerSearch extends React.Component {
             }
         }
 
-        console.log('default index should be', defaultIndex);
-
         return (
             <Container fluid style={{ overflow: 'auto' }}>
                 <Input

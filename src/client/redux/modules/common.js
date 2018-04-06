@@ -28,7 +28,7 @@ export const pitchingStatNames = {
     w:   { name: 'w',    type: 'count',      direction: 'positive' }
 };
 
-export const formatStats = (state, type) => {
+export const formatStats = (state, type = state.type) => {
 
     const statType = type === 'Batting' ?
     { ...battingStatNames } :

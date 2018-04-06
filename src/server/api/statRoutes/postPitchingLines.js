@@ -5,8 +5,6 @@ const StatCommon = require('./statCommon');
 
 module.exports = (req, res) => {
 
-    console.log('in pitching lines and payload', req.body.payload);
-
     const payload = req.body.payload;
     if (!payload) {
         return res.status(400).send('Bad payload');
