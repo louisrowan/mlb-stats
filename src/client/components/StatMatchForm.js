@@ -6,8 +6,8 @@ const { Button, Input, Table } = require('semantic-ui-react');
 const StatMatchForm = (props) => {
 
     const {
-        minAb,
-        updateMinAb,
+        minAbIp,
+        updateMinAbIp,
         minYear,
         updateMinYear,
         maxYear,
@@ -18,7 +18,8 @@ const StatMatchForm = (props) => {
         updateMaxAge,
         stats,
         updateStatValue,
-        toggleStatActive
+        toggleStatActive,
+        type
     } = props;
 
     return (
@@ -30,12 +31,12 @@ const StatMatchForm = (props) => {
                 <Table.Cell>Max</Table.Cell>
             </Table.Row>
             <Table.Row>
-                <Table.Cell>ab</Table.Cell>
+                <Table.Cell>{type === 'Batting' ? 'ab' : 'ip'}</Table.Cell>
                 <Table.Cell>
                     <Input
-                        onChange={(e) => updateMinAb(e.target.value)}
+                        onChange={(e) => updateMinAbIp(e.target.value)}
                         type='number'
-                        value={minAb}
+                        value={minAbIp}
                         min={1}
                     />
                 </Table.Cell>

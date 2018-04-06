@@ -1,6 +1,14 @@
 const Common = require('./common');
 
 // actions and action creators
+const STATQUERY_UPDATE_TYPE = 'STATQUERY_UPDATE_TYPE';
+export const statqueryUpdateType = (value) => {
+    return {
+        type: STATQUERY_UPDATE_TYPE,
+        value
+    }
+};
+
 const STATQUERY_UPDATE_LOADING = 'STATQUERY_UPDATE_LOADING';
 export const statqueryUpdateLoading = (value) => {
     return {
@@ -24,10 +32,10 @@ export const statqueryFetchBattingLinesFailure = () => {
     }
 };
 
-const STATQUERY_UPDATE_MIN_AB = 'STATQUERY_UPDATE_MIN_AB';
-export const statqueryUpdateMinAb = (value) => {
+const STATQUERY_UPDATE_MIN_AB_IP = 'STATQUERY_UPDATE_MIN_AB_IP';
+export const statqueryUpdateMinAbIp = (value) => {
     return {
-        type: STATQUERY_UPDATE_MIN_AB,
+        type: STATQUERY_UPDATE_MIN_AB_IP,
         value
     }
 };
@@ -95,17 +103,15 @@ const initialState = {
     battingLinesArray: [],
     hasData: false,
     loading: false,
-    minAb: 100,
+    minAbIp: 100,
     minAge: 0,
     maxAge: 100,
     maxYear: 2016,
     minYear: 1891,
-    statNames: Common.statNames.slice(0),
-    stats: {}
+    statNames: [],
+    stats: {},
+    type: ''
 };
-
-Common.formatStatNames(initialState);
-
 
 
 
@@ -152,6 +158,15 @@ const updateStatValueReducer = (state, action) => {
 export const reducer = (state = initialState, action) => {
 
     switch (action.type) {
+        case STATQUERY_UPDATE_TYPE:
+            const statNames = action.value === 'Batting' ? Common.battingStatNames.slice(0) : Common.pitchingStatNames.slice(0);
+            const stats = Common.formatStats(state, action.value);
+            return {
+                ...state,
+                type: action.value,
+                statNames,
+                stats
+            };
         case STATQUERY_UPDATE_LOADING:
             return {
                 ...state,
@@ -171,10 +186,10 @@ export const reducer = (state = initialState, action) => {
                 hasData: false,
                 loading: false
             }
-        case STATQUERY_UPDATE_MIN_AB:
+        case STATQUERY_UPDATE_MIN_AB_IP:
             return {
                 ...state,
-                minAb: action.value
+                minAbIp: action.value
             }
         case STATQUERY_UPDATE_MIN_YEAR:
             return {

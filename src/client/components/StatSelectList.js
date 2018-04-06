@@ -8,6 +8,8 @@ const {
 
 const StatSelectList = (props) => {
 
+    console.log('in stat select', props.stats);
+
     const {
         stats,
         toggleStatActive

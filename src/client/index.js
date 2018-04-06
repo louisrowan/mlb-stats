@@ -27,7 +27,8 @@ const App = () => {
                     <Route path='/' component={NavBar} />
                     <Route path='/' exact component={Home} />
                     <Route path='/similar' component={FindSimilar} />
-                    <Route path='/query' component={StatQuery} />
+                    <Route path='/queryBatting' component={StatQuery} />
+                    <Route path='/queryPitching' component={StatQuery} />
                     <Route path='/playerSearch' component={PlayerSearch} />
                     <Route path='/' component={Footer} />
                 </div>

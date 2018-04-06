@@ -1,5 +1,6 @@
 'use strict';
 
+const Common = require('../common');
 const Data = require('../data');
 
 const internals = {};
@@ -30,7 +31,7 @@ internals.findIndex = (statTotals, min, max) => {
     else {
         return midpoint + internals.findIndex(statTotals.slice(midpoint, length), min, max);
     }
-}
+};
 
 
 internals.getMatchingStats = ({
@@ -89,10 +90,7 @@ internals.getMatchingStats = ({
         return ids;
     }
     return [];
-}
-
-
-
+};
 
 
 exports.getMinimumStatMatches = ({
@@ -154,4 +152,68 @@ exports.getMinimumStatMatches = ({
         minResults,
         additionalMatches
     }
-}
+};
+
+
+
+exports.filterInitialMatchingStats = ({
+    minResults,
+    additionalMatches,
+    minAge,
+    maxAge,
+    type
+}) => {
+
+    const namesFile = Data.NamesFile;
+    // const formattedBattingLines = Data.BattingLinesFile;
+
+    const formattedStatLines = type === 'Batting' ? Data.BattingLinesFile : Data.PitchingLinesFile;
+
+    // loop thru each match for first stat
+    const statLines = [];
+    let count = 0;
+    minResults.forEach((id) => {
+
+        if (count > 199) return; // max 100 results for now
+
+        try {
+
+            const splitId = id.split('-');
+            const playerId = splitId[0];
+            const year = splitId[1];
+
+            // find batting line index and locate correct batting line
+            const index = Common.findStatLineByIdYear(formattedStatLines, playerId, year);
+
+
+            const player = type === 'Batting' ? Common.formatBattingData(formattedStatLines[index], namesFile) : Common.formatPitchingData(formattedStatLines[index], namesFile)
+
+
+            // loop thru additional stats in payload to see if they are also a match
+            let matchesAll = true;
+            if (+player.age < minAge || +player.age > maxAge) matchesAll = false;
+            additionalMatches.forEach((match) => {
+
+                if (!matchesAll) return;
+
+                const splitStats = match.params.split(',');
+                const min = +splitStats[0];
+                const max = +splitStats[1];
+
+                if (player[match.stat] < min || player[match.stat] > max) {
+                    matchesAll = false;
+                }
+            })
+
+            if (matchesAll) {
+                ++count
+                statLines.push(player)
+            };
+        }
+        catch (err) {
+            console.log('error in post batting data', id, err);
+            return [];
+        }
+    });
+    return statLines;
+};

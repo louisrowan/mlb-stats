@@ -130,11 +130,11 @@ internals.formatPercentageStat = (stat) => {
 // year: 2004
 // @return
 // int or error
-const findBattingLineByIdYear = (battingLines, id, year) => {
+const findStatLineByIdYear = (statLines, id, year) => {
 
-    const length = battingLines.length;
+    const length = statLines.length;
     if (length === 1) {
-        if (battingLines[0][0] === id && battingLines[0][1] === year) {
+        if (statLines[0][0] === id && statLines[0][1] === year) {
             return 0;
         }
         else {
@@ -144,16 +144,16 @@ const findBattingLineByIdYear = (battingLines, id, year) => {
     }
 
     const midpoint = Math.floor(length / 2);
-    const isIdMatch = battingLines[midpoint][0] === id;
+    const isIdMatch = statLines[midpoint][0] === id;
 
-    if (isIdMatch && battingLines[midpoint][1] === year) {
+    if (isIdMatch && statLines[midpoint][1] === year) {
         return midpoint;
     }
-    if (battingLines[midpoint][0] > id || (isIdMatch && battingLines[midpoint][1] > year)) {
-        return findBattingLineByIdYear(battingLines.slice(0, midpoint), id, year);
+    if (statLines[midpoint][0] > id || (isIdMatch && statLines[midpoint][1] > year)) {
+        return findStatLineByIdYear(statLines.slice(0, midpoint), id, year);
     }
     else {
-        return midpoint + findBattingLineByIdYear(battingLines.slice(midpoint, length), id, year);
+        return midpoint + findStatLineByIdYear(statLines.slice(midpoint, length), id, year);
     }
 }
 
@@ -260,7 +260,7 @@ const formatPitchingData = (data, namesFile) => {
 module.exports = {
     // findStatLineById,
     getIndexFromId,
-    findBattingLineByIdYear,
+    findStatLineByIdYear,
     formatBattingData,
     formatPitchingData
 }
