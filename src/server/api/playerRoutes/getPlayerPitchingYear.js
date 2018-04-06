@@ -10,15 +10,15 @@ module.exports = (req, res) => {
     const year = req.params.year;
 
     const namesFile = Data.NamesFile;
-    const battingStatsArray = Data.BattingLinesFile;
+    const pitchingStatsArray = Data.PitchingLinesFile;
 
     let indexInArray;
     try {
-        indexInArray = Common.findStatLineByIdYear(battingStatsArray, playerId, year);
+        indexInArray = Common.findStatLineByIdYear(pitchingStatsArray, playerId, year);
     }
     catch (err) {
         return [];
     }
 
-    res.send(Common.formatBattingData(battingStatsArray[indexInArray], namesFile));
+    res.send(Common.formatPitchingData(pitchingStatsArray[indexInArray], namesFile));
 };

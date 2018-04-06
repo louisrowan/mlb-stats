@@ -119,8 +119,6 @@ const initialState = {
 
 const toggleStatActiveReducer = (state, action) => {
 
-    console.log('in toggle stat active reducer', state, action);
-
     const newStats = {};
     Object.keys(state.statNames).forEach((statName) => {
         const newStat = { ...state.stats[statName]};
@@ -154,6 +152,17 @@ const updateStatValueReducer = (state, action) => {
     }
 };
 
+
+const resetReducer = (state, action) => {
+
+    const { statNames, stats } = Common.formatStats(state, action.value);
+    return { 
+        ...initialState,
+        type: state.type,
+        statNames,
+        stats
+    };  
+};
 
 
 // statQuery root reducer
@@ -217,8 +226,8 @@ export const reducer = (state = initialState, action) => {
         case STATQUERY_UPDATE_STAT_VALUE:
             return updateStatValueReducer(state, action);
         case STATQUERY_RESET:
-            return initialState;
+            return resetReducer(state, action);
         default:
             return state;
     }
-}
+};

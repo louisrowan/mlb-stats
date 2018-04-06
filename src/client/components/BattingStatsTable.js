@@ -14,6 +14,7 @@ class BattingStatsTable extends React.Component {
         this.state = {
             sortedStat: '',
             sortedDirection: '',
+            type: this.props.type,
             statlineArray: this.props.statlineArray.slice(0) // copy statline array props into state so that it can be reordered in this component when sorted. Parent does not need to be updated on this since sorting is just a visual of data and alerting the parent to update its data is not needed for this use case. This also allows for multiple parents to use this child component without needing all of them to know how to handle sorted data.
         };
     }
@@ -22,7 +23,10 @@ class BattingStatsTable extends React.Component {
     componentWillReceiveProps = (newProps) => {
 
         if (newProps.statlineArray) {
-            this.setState({ statlineArray: newProps.statlineArray})
+            this.setState({ statlineArray: newProps.statlineArray});
+        }
+        if (newProps.type) {
+            this.setState({ type: newProps.type });
         }
     }
 
@@ -57,7 +61,8 @@ class BattingStatsTable extends React.Component {
         const {
             sortedStat,
             sortedDirection,
-            statlineArray
+            statlineArray,
+            type
         } = this.state;
 
         return (
@@ -93,7 +98,7 @@ class BattingStatsTable extends React.Component {
                     {statlineArray.map((year, index) => {
 
                         return (
-                            <BattingStatsRow key={index} year={year} sortedStat={sortedStat} />
+                            <BattingStatsRow type={type} key={index} year={year} sortedStat={sortedStat} />
                         )
                     })}
                 </Table.Body>

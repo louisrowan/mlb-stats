@@ -45,6 +45,8 @@ internals.getMatchingStats = ({
         type
     }) => {
 
+    console.log('data?', type, stat);
+
     const indexedData = Data[`Indexed_${type}_${stat}_Data`];
     const statTotals = indexedData.map((line) => +line[0]);
 

@@ -108,7 +108,7 @@ const StatMatchForm = (props) => {
                     const error = direction === 'positive' ?
                         !minVal : !maxVal;
 
-                    const step = type === 'count' ? 1 : .1;
+                    const step = type === 'count' ? 1 : .01;
 
                     return (
                     <Table.Row key={s}>

@@ -3,7 +3,7 @@ const Axios = require('axios');
 const _ = require('lodash');
 
 const { connect } = require('react-redux');
-const { bindActionCreators } = require('redux')
+const { bindActionCreators } = require('redux');
 const {
     statqueryUpdateLoading,
     statqueryFetchBattingLinesSuccess,
@@ -184,7 +184,7 @@ class StatQuery extends React.Component {
                     <br />
                     <Header as='h4' content={`Your search contained ${battingLinesArray.length} result${battingLinesArray.length === 1 ? '' : 's'}`} />
                 { battingLinesArray.length > 0 &&
-                    <BattingStatsTable statlineArray={battingLinesArray} />
+                    <BattingStatsTable statlineArray={battingLinesArray} type={type} />
                 }
                 </Container>
             }
