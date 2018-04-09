@@ -52,6 +52,7 @@ class PlayerSearch extends React.Component {
         super(props)
 
         this.state = {
+            dataCount: 0,
             players: [],
             activePlayerBatting: [],
             activePlayerPitching: [],
@@ -100,7 +101,8 @@ class PlayerSearch extends React.Component {
 
         this.setState({
             activePlayerBatting: [],
-            activePlayerPitching: []
+            activePlayerPitching: [],
+            dataCount: 0
         });
 
         Axios.get('/api/players/' + playerId + '/batting')
@@ -108,26 +110,44 @@ class PlayerSearch extends React.Component {
 
                 this.setState({
                     activePlayerBatting: res.data,
-                    searchTerm: ''
+                    searchTerm: '',
+                    dataCount: ++this.state.dataCount
                 });
             })
-            .catch(err => console.log('err getting batting data', err));
+            .catch(err => {
+
+                this.setState({ dataCount: ++this.state.dataCount });
+
+                console.log('err getting batting data', err);
+            });
 
         Axios.get('/api/players/' + playerId + '/pitching')
             .then(res => {
 
                 this.setState({
                     activePlayerPitching: res.data,
-                    searchTerm: ''
+                    searchTerm: '',
+                    dataCount: ++this.state.dataCount
                 });
             })
-            .catch(err => console.log('err getting pitching data', err));
+            .catch(err => {
+
+                this.setState({ dataCount: ++this.state.dataCount });
+
+                console.log('err getting pitching data', err);
+            });
     }
 
 
     render () {
 
-        const { activePlayerBatting, activePlayerPitching, players, searchTerm } = this.state;
+        const {
+            activePlayerBatting,
+            activePlayerPitching,
+            dataCount,
+            players,
+            searchTerm
+        } = this.state;
 
         const splitTerm = searchTerm ? searchTerm.toLowerCase().split(' ').filter((t) => t != "") : [];
 
@@ -186,16 +206,27 @@ class PlayerSearch extends React.Component {
         if (activePlayerBatting.length) {
             panes.push({ menuItem: 'Batting', render: () =>
                 <Tab.Pane>
-                    <BattingStatsTable statlineArray={activePlayerBatting} />
+                    <BattingStatsTable type='Batting' statlineArray={activePlayerBatting} />
                 </Tab.Pane>
             });
         }
         if (activePlayerPitching.length) {
             panes.push({ menuItem: 'Pitching', render: () =>
                 <Tab.Pane>
-                    <BattingStatsTable statlineArray={activePlayerPitching} />
+                    <BattingStatsTable type='Pitching' statlineArray={activePlayerPitching} />
                 </Tab.Pane>
             });
+        }
+
+        let defaultIndex = 0;
+        if (panes.length === 2) {
+
+            const atBats = activePlayerBatting.reduce((a, b) => a += b.ab, 0);
+            const inningsPitched = activePlayerPitching.reduce((a, b) => a += b.ip, 0);
+
+            if (inningsPitched > atBats) {
+                defaultIndex = 1;
+            }
         }
 
         return (
@@ -209,8 +240,8 @@ class PlayerSearch extends React.Component {
             { players.length > 0 && searchTerm.length > 2 &&
                 <Card.Group>{filter}</Card.Group>
             }
-            { activePlayerBatting.length > 0 &&
-                <Tab panes={panes} />
+            { dataCount === 2 &&
+                <Tab panes={panes} defaultActiveIndex={defaultIndex} />
             }
             </Container>
         )

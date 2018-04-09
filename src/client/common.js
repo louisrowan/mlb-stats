@@ -1,5 +1,5 @@
 export const createStatlinePayload = ({
-    minAb,
+    minAbIp,
     minAge,
     maxAge,
     minYear,
@@ -9,7 +9,7 @@ export const createStatlinePayload = ({
 
     const payload = {
         stats: {},
-        minAb,
+        minAbIp,
         minAge,
         maxAge,
         minYear,

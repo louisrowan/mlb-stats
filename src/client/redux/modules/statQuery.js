@@ -1,6 +1,14 @@
 const Common = require('./common');
 
 // actions and action creators
+const STATQUERY_UPDATE_TYPE = 'STATQUERY_UPDATE_TYPE';
+export const statqueryUpdateType = (value) => {
+    return {
+        type: STATQUERY_UPDATE_TYPE,
+        value
+    }
+};
+
 const STATQUERY_UPDATE_LOADING = 'STATQUERY_UPDATE_LOADING';
 export const statqueryUpdateLoading = (value) => {
     return {
@@ -24,10 +32,10 @@ export const statqueryFetchBattingLinesFailure = () => {
     }
 };
 
-const STATQUERY_UPDATE_MIN_AB = 'STATQUERY_UPDATE_MIN_AB';
-export const statqueryUpdateMinAb = (value) => {
+const STATQUERY_UPDATE_MIN_AB_IP = 'STATQUERY_UPDATE_MIN_AB_IP';
+export const statqueryUpdateMinAbIp = (value) => {
     return {
-        type: STATQUERY_UPDATE_MIN_AB,
+        type: STATQUERY_UPDATE_MIN_AB_IP,
         value
     }
 };
@@ -95,17 +103,15 @@ const initialState = {
     battingLinesArray: [],
     hasData: false,
     loading: false,
-    minAb: 100,
+    minAbIp: 100,
     minAge: 0,
     maxAge: 100,
     maxYear: 2016,
     minYear: 1891,
-    statNames: Common.statNames.slice(0),
-    stats: {}
+    statNames: {},
+    stats: {},
+    type: ''
 };
-
-Common.formatStatNames(initialState);
-
 
 
 
@@ -114,7 +120,7 @@ Common.formatStatNames(initialState);
 const toggleStatActiveReducer = (state, action) => {
 
     const newStats = {};
-    state.statNames.forEach((statName) => {
+    Object.keys(state.statNames).forEach((statName) => {
         const newStat = { ...state.stats[statName]};
         if (newStat.stat === action.stat) {
             newStat.active = !newStat.active;
@@ -132,7 +138,7 @@ const toggleStatActiveReducer = (state, action) => {
 const updateStatValueReducer = (state, action) => {
 
     const newStats = {};
-    state.statNames.forEach((statName) => {
+    Object.keys(state.statNames).forEach((statName) => {
         const newStat = { ...state.stats[statName]};
         if (newStat.stat === action.stat) {
             newStat[action.minMax] = action.value;
@@ -147,11 +153,30 @@ const updateStatValueReducer = (state, action) => {
 };
 
 
+const resetReducer = (state, action) => {
+
+    const { statNames, stats } = Common.formatStats(state, action.value);
+    return { 
+        ...initialState,
+        type: state.type,
+        statNames,
+        stats
+    };  
+};
+
 
 // statQuery root reducer
 export const reducer = (state = initialState, action) => {
 
     switch (action.type) {
+        case STATQUERY_UPDATE_TYPE:
+            const { statNames, stats } = Common.formatStats(state, action.value);
+            return {
+                ...state,
+                type: action.value,
+                statNames,
+                stats
+            };
         case STATQUERY_UPDATE_LOADING:
             return {
                 ...state,
@@ -171,10 +196,10 @@ export const reducer = (state = initialState, action) => {
                 hasData: false,
                 loading: false
             }
-        case STATQUERY_UPDATE_MIN_AB:
+        case STATQUERY_UPDATE_MIN_AB_IP:
             return {
                 ...state,
-                minAb: action.value
+                minAbIp: action.value
             }
         case STATQUERY_UPDATE_MIN_YEAR:
             return {
@@ -184,7 +209,7 @@ export const reducer = (state = initialState, action) => {
         case STATQUERY_UPDATE_MAX_YEAR:
             return {
                 ...state,
-                maxYear: action.value
+                maxYear: action.value < 2016 ? action.value : 2016
             }
         case STATQUERY_UPDATE_MIN_AGE:
             return {
@@ -194,15 +219,15 @@ export const reducer = (state = initialState, action) => {
         case STATQUERY_UPDATE_MAX_AGE:
             return {
                 ...state,
-                maxAge: action.value
+                maxAge: action.value < 100 ? action.value : 100
             }
         case STATQUERY_TOGGLE_STAT_ACTIVE:
             return toggleStatActiveReducer(state, action);
         case STATQUERY_UPDATE_STAT_VALUE:
             return updateStatValueReducer(state, action);
         case STATQUERY_RESET:
-            return initialState;
+            return resetReducer(state, action);
         default:
             return state;
     }
-}
+};

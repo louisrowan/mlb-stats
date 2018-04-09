@@ -4,7 +4,9 @@ const { Table } = require('semantic-ui-react');
 
 const BattingStatsRow = (props) => {
 
-    const { year, sortedStat } = props;
+    const { year, sortedStat, type } = props;
+
+    const linkTo = type === 'Batting' ? 'similarBatting' : 'similarPitching';
 
     return (
         <Table.Row>
@@ -34,7 +36,7 @@ const BattingStatsRow = (props) => {
                 )
             })}
             <Table.Cell>
-                <Link to={'/similar?' + year._id + '-' + year.year}>Find Similar</Link>
+                <Link to={`/${linkTo}?${year._id}-${year.year}`}>Find Similar</Link>
             </Table.Cell>
         </Table.Row>
     )

@@ -13,15 +13,17 @@ const StatSelectList = (props) => {
         toggleStatActive
     } = props;
 
-    const listItems = Object.keys(stats).map((s) => {
+    const listItems = Object.keys(stats).map((name) => {
 
-        const active = stats[s].active;
+        const stat = stats[name];
+
+        const active = stat.active;
         return (
-            <List.Item key={s}>
+            <List.Item key={name}>
                 <Checkbox
                     checked={active}
-                    onChange={() => toggleStatActive(s)}
-                    label={s}
+                    onChange={() => toggleStatActive(name)}
+                    label={name}
                 />
             </List.Item>
         )

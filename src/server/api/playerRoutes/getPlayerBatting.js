@@ -16,7 +16,7 @@ module.exports = (req, res) => {
         indexInArray = Common.getIndexFromId(battingStatsArray, playerId);
     }
     catch (err) {
-        return [];
+        return res.send([]);
     }
 
     let startIndex = indexInArray;

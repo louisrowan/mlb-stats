@@ -5,9 +5,6 @@ const StatCommon = require('./statCommon');
 
 module.exports = (req, res) => {
 
-    console.log(req.body.payload);
-
-    const type = 'Batting';
     const payload = req.body.payload;
     if (!payload) {
         return res.status(400).send('Bad payload');
@@ -16,7 +13,7 @@ module.exports = (req, res) => {
 
     // format payload
     const stats = payload.stats;
-    const minAb = +payload.minAbIp;
+    const minIp = +payload.minAbIp;
     const minYear = +payload.minYear;
     const maxYear = +payload.maxYear;
     const minAge = +payload.minAge || 0;
@@ -30,18 +27,17 @@ module.exports = (req, res) => {
         stats,
         minYear,
         maxYear,
-        minAb,
-        type
+        minIp,
+        type: 'Pitching'
     });
 
 
-    const battingLines = StatCommon.filterInitialMatchingStats({
+    const pitchingLines = StatCommon.filterInitialMatchingStats({
         minResults,
         additionalMatches,
         minAge,
-        maxAge,
-        type
+        maxAge
     });
 
-    res.send(battingLines);
+    res.send(pitchingLines);
 };

@@ -3,19 +3,20 @@ const Axios = require('axios');
 const _ = require('lodash');
 
 const { connect } = require('react-redux');
-const { bindActionCreators } = require('redux')
+const { bindActionCreators } = require('redux');
 const {
     statqueryUpdateLoading,
     statqueryFetchBattingLinesSuccess,
     statqueryFetchBattingLinesFailure,
-    statqueryUpdateMinAb,
+    statqueryUpdateMinAbIp,
     statqueryUpdateMinAge,
     statqueryUpdateMaxAge,
     statqueryUpdateMinYear,
     statqueryUpdateMaxYear,
     statqueryToggleStatActive,
     statqueryUpdateStatValue,
-    statqueryReset
+    statqueryReset,
+    statqueryUpdateType
 } = require('../redux/modules/statQuery');
 
 const {
@@ -60,13 +61,15 @@ class StatQuery extends React.Component {
     componentDidMount = () => {
 
         this.props.statqueryReset();
+        const type = this.props.location.pathname.includes('Batting') ? 'Batting' : 'Pitching'
+        this.props.statqueryUpdateType(type);
     };
 
 
     handleSubmit = () => {
 
         const payload = Common.createStatlinePayload({
-            minAb: this.props.minAb,
+            minAbIp: this.props.minAbIp,
             minAge: this.props.minAge,
             maxAge: this.props.maxAge,
             minYear: this.props.minYear,
@@ -75,7 +78,7 @@ class StatQuery extends React.Component {
         });
 
         this.props.statqueryUpdateLoading(true);
-        Axios.post('/api/stats/battingLines', { payload })
+        Axios.post(`/api/stats/${this.props.type.toLowerCase()}Lines`, { payload })
             .then(res => {
 
                 this.props.statqueryFetchBattingLinesSuccess(res.data);
@@ -100,8 +103,16 @@ class StatQuery extends React.Component {
 
             if (stat.active) {
                 anyActive = true;
-                if (!stat.min && stat.min !== 0) {
-                    missingVal = true;
+
+                if (stat.direction === 'positive') {
+                    if (!stat.min && stat.min !== 0) {
+                        missingVal = true;
+                    }
+                }
+                else {
+                    if (!stat.max) {
+                        missingVal = true;
+                    }
                 }
             }
         })
@@ -119,13 +130,14 @@ class StatQuery extends React.Component {
             battingLinesArray,
             hasData,
             loading,
-            minAb,
+            minAbIp,
             minAge,
             maxAge,
             minYear,
             maxYear,
             stats,
-            statqueryUpdateMinAb,
+            type,
+            statqueryUpdateMinAbIp,
             statqueryUpdateMinAge,
             statqueryUpdateMaxAge,
             statqueryUpdateMinYear,
@@ -142,8 +154,8 @@ class StatQuery extends React.Component {
                     toggleStatActive={statqueryToggleStatActive}
                 />
                 <StatMatchForm 
-                    minAb={minAb}
-                    updateMinAb={statqueryUpdateMinAb}
+                    minAbIp={minAbIp}
+                    updateMinAbIp={statqueryUpdateMinAbIp}
                     minYear={minYear}
                     updateMinYear={statqueryUpdateMinYear}
                     maxYear={maxYear}
@@ -155,6 +167,7 @@ class StatQuery extends React.Component {
                     stats={stats}
                     updateStatValue={statqueryUpdateStatValue}
                     toggleStatActive={statqueryToggleStatActive}
+                    type={type}
                 />
                 <Button
                     color='green'
@@ -171,7 +184,7 @@ class StatQuery extends React.Component {
                     <br />
                     <Header as='h4' content={`Your search contained ${battingLinesArray.length} result${battingLinesArray.length === 1 ? '' : 's'}`} />
                 { battingLinesArray.length > 0 &&
-                    <BattingStatsTable statlineArray={battingLinesArray} />
+                    <BattingStatsTable statlineArray={battingLinesArray} type={type} />
                 }
                 </Container>
             }
@@ -188,12 +201,13 @@ const mapStateToProps = (state) => {
         battingLinesArray: state.statQuery.battingLinesArray,
         hasData: state.statQuery.hasData,
         loading: state.statQuery.loading,
-        minAb: state.statQuery.minAb,
+        minAbIp: state.statQuery.minAbIp,
         minAge: state.statQuery.minAge,
         maxAge: state.statQuery.maxAge,
         minYear: state.statQuery.minYear,
         maxYear: state.statQuery.maxYear,
-        stats: state.statQuery.stats
+        stats: state.statQuery.stats,
+        type: state.statQuery.type
     }
 }
 
@@ -203,14 +217,15 @@ const mapDispatchToProps = (dispatch) => {
         statqueryUpdateLoading,
         statqueryFetchBattingLinesSuccess,
         statqueryFetchBattingLinesFailure,
-        statqueryUpdateMinAb,
+        statqueryUpdateMinAbIp,
         statqueryUpdateMinAge,
         statqueryUpdateMaxAge,
         statqueryUpdateMinYear,
         statqueryUpdateMaxYear,
         statqueryToggleStatActive,
         statqueryUpdateStatValue,
-        statqueryReset
+        statqueryReset,
+        statqueryUpdateType
     }, dispatch);
 }
 

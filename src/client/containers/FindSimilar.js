@@ -17,14 +17,15 @@ const {
     statqueryUpdateLoading,
     statqueryFetchBattingLinesSuccess,
     statqueryFetchBattingLinesFailure,
-    statqueryUpdateMinAb,
+    statqueryUpdateMinAbIp,
     statqueryUpdateMinAge,
     statqueryUpdateMaxAge,
     statqueryUpdateMinYear,
     statqueryUpdateMaxYear,
     statqueryToggleStatActive,
     statqueryUpdateStatValue,
-    statqueryReset
+    statqueryReset,
+    statqueryUpdateType
 } = require('../redux/modules/statQuery');
 
 const Common = require('../common');
@@ -53,17 +54,23 @@ class FindSimilar extends React.Component {
 
         super(props);
 
+        const type = this.props.location.pathname.includes('Batting') ? 'Batting' : 'Pitching'
+
         this.state = {
             lineToMatch: {},
             lineToMatchId: '',
             modalOpen: false,
+            type,
             variance: 10
         }
     }
 
     componentDidMount () {
 
+        const { type } = this.state;
+
         this.props.statqueryReset();
+        this.props.statqueryUpdateType(type);
 
         const playerIdYear = this.props.location.search.slice(1);
 
@@ -73,7 +80,7 @@ class FindSimilar extends React.Component {
 
         const [id, year] = playerIdYear.split('-');
 
-        Axios.get('/api/players/' + id + '/batting/' + year)
+        Axios.get(`/api/players/${id}/${type.toLowerCase()}/${year}`)
             .then(res => {
 
                 this.setState({
@@ -129,7 +136,7 @@ class FindSimilar extends React.Component {
     handleSubmit = () => {
 
         const payload = Common.createStatlinePayload({
-            minAb: this.props.minAb,
+            minAbIp: this.props.minAbIp,
             minAge: this.props.minAge,
             maxAge: this.props.maxAge,
             minYear: this.props.minYear,
@@ -138,7 +145,7 @@ class FindSimilar extends React.Component {
         });
 
         this.props.statqueryUpdateLoading(true);
-        Axios.post('/api/stats/battingLines', { payload })
+        Axios.post(`/api/stats/${this.state.type.toLowerCase()}Lines`, { payload })
             .then(res => {
 
                 const results = res.data.filter((l) => {
@@ -167,13 +174,14 @@ class FindSimilar extends React.Component {
             battingLinesArray,
             hasMatchingData,
             loading,
-            minAb,
+            minAbIp,
             minAge,
             maxAge,
             minYear,
             maxYear,
             stats,
-            statqueryUpdateMinAb,
+            type,
+            statqueryUpdateMinAbIp,
             statqueryUpdateMinAge,
             statqueryUpdateMaxAge,
             statqueryUpdateMinYear,
@@ -225,14 +233,14 @@ class FindSimilar extends React.Component {
             { modalOpen && modal }
             { hasData &&
                 <Container fluid>
-                    <BattingStatsTable statlineArray={[lineToMatch]} />
+                    <BattingStatsTable statlineArray={[lineToMatch]} type={type} />
                     <StatSelectList
                         stats={stats}
                         toggleStatActive={statqueryToggleStatActive}
                     />
                     <StatMatchForm 
-                        minAb={minAb}
-                        updateMinAb={statqueryUpdateMinAb}
+                        minAbIp={minAbIp}
+                        updateMinAbIp={statqueryUpdateMinAbIp}
                         minYear={minYear}
                         updateMinYear={statqueryUpdateMinYear}
                         maxYear={maxYear}
@@ -244,6 +252,7 @@ class FindSimilar extends React.Component {
                         stats={stats}
                         updateStatValue={statqueryUpdateStatValue}
                         toggleStatActive={statqueryToggleStatActive}
+                        type={type}
                     />
                     <Button
                         color='green'
@@ -280,12 +289,13 @@ const mapStateToProps = (state) => {
         battingLinesArray: state.statQuery.battingLinesArray,
         hasMatchingData: state.statQuery.hasData,
         loading: state.statQuery.loading,
-        minAb: state.statQuery.minAb,
+        minAbIp: state.statQuery.minAbIp,
         minAge: state.statQuery.minAge,
         maxAge: state.statQuery.maxAge,
         minYear: state.statQuery.minYear,
         maxYear: state.statQuery.maxYear,
-        stats: state.statQuery.stats
+        stats: state.statQuery.stats,
+        type: state.statQuery.type
     }
 }
 
@@ -295,14 +305,15 @@ const mapDispatchToProps = (dispatch) => {
         statqueryUpdateLoading,
         statqueryFetchBattingLinesSuccess,
         statqueryFetchBattingLinesFailure,
-        statqueryUpdateMinAb,
+        statqueryUpdateMinAbIp,
         statqueryUpdateMinAge,
         statqueryUpdateMaxAge,
         statqueryUpdateMinYear,
         statqueryUpdateMaxYear,
         statqueryToggleStatActive,
         statqueryUpdateStatValue,
-        statqueryReset
+        statqueryReset,
+        statqueryUpdateType
     }, dispatch);
 }
 
