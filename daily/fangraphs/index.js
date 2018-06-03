@@ -1,9 +1,9 @@
 'use strict';
 
-const Wreck = require('wreck');
 const Cheerio = require('cheerio');
 
 const GetPlayerData = require('./getPlayerData');
+const Upstream = require('./Upstream');
 
 
 const domain = 'https://www.fangraphs.com';
@@ -12,9 +12,9 @@ const domain = 'https://www.fangraphs.com';
 
 const getGames = (next) => { // get html
 
-    const path = '/livescoreboard.aspx?date=2018-06-02';
+    const path = '/livescoreboard.aspx?date=2018-06-01';
 
-    Wreck.get(domain + path, {}, (err, res, payload) => {
+    Upstream.get(domain + path, {}, (err, res, payload) => {
 
         const html = payload.toString();
         const $ = Cheerio.load(html);
@@ -26,13 +26,15 @@ const getGames = (next) => { // get html
             games.push($(this));
         });
 
-        return next(games)
+        return next(games);
     });
 };
 
 
 
 const parseGames = (games) => { // games by team
+
+    console.log('num teams', games.length);
 
     games.forEach((game) => {
 
@@ -111,24 +113,27 @@ const parseTeams = (rows) => { // split up pitcher and lineup
     return getTeamStats(team);
 }
 
-
+let pC = 0;
+let lC = 0;
 
 
 const getTeamStats = (team) => {
 
     if (team.pitcher) {
-        GetPlayerData.getPitcherData(team.pitcher);
+        GetPlayerData.getPitcherData(team.pitcher, (result) => {
+
+            console.log('pitcher done', ++pC);
+        });
     }
 
     if (team.lineup) {
-        GetPlayerData.getLineupData(team.lineup);
+        GetPlayerData.getLineupData(team.lineup, (result) => {
+
+            console.log('lineup done', ++lC);
+        });
     }
 
 }
-
-
-
-
 
 
 
