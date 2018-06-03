@@ -5,6 +5,7 @@
 const Cheerio = require('cheerio');
 
 const GetPlayerData = require('./getPlayerData');
+const RankPitchers = require('./rankPitchers');
 const Upstream = require('./Upstream');
 
 
@@ -220,7 +221,7 @@ const getTeamStats = (team, cb) => {
 
 const handleAllDataFetched = (games) => {
 
-    console.log(JSON.stringify(games, null, 2));
+    const rankedPitchers = RankPitchers.rankRaw(games);
 }
 
 
