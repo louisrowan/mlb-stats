@@ -12,13 +12,16 @@ const NavBar = (props) => {
                 <Button inverted={pathname === '/' ? true : false} content='Home' />
             </Link>
             <Link to='/queryBatting'>
-                <Button inverted={pathname === '/queryBatting' ? true : false}content='Batting Stats Search' />
+                <Button inverted={pathname === '/queryBatting' ? true : false} content='Batting Stats Search' />
             </Link>
             <Link to='/queryPitching'>
-                <Button inverted={pathname === '/queryPitching' ? true : false}content='Pitching Stats Search' />
+                <Button inverted={pathname === '/queryPitching' ? true : false} content='Pitching Stats Search' />
             </Link>
             <Link to='/playerSearch'>
-                <Button inverted={pathname === '/playerSearch' ? true : false}content='Player Search' />
+                <Button inverted={pathname === '/playerSearch' ? true : false} content='Player Search' />
+            </Link>
+            <Link to='/fangraphs'>
+                <Button inverted={pathname === '/fangraphs' ? true : false} content='Fangraphs Search' />
             </Link>
         </Segment>
     )

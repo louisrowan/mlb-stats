@@ -7,6 +7,8 @@ const NamesCSV = Path.resolve(__dirname, './names.csv');
 const BattingLinesCSV = Path.resolve(__dirname, './formattedBatting.csv');
 const PitchingLinesCSV = Path.resolve(__dirname, './formattedPitching.csv');
 
+const Fangraphs = require('./fangraphs');
+
 const internals = {
     battingStats: [
         'avg',
@@ -77,4 +79,9 @@ internals.pitchingStats.forEach((stat) => {
     const result = file.map((line) => line.split(','));
     exports[`Indexed_Pitching_${stat}_Data`] = result;
 });
+
+
+
+exports.FangraphsPitchingStats = Fangraphs.getPitchingStats();
+exports.FangraphsPitchingData = Fangraphs.pitchingData();
 

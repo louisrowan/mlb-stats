@@ -14,6 +14,11 @@ const GetPlayerPitchingYear = require('./playerRoutes/getPlayerPitchingYear');
 const PostBattingLines = require('./statRoutes/postBattingLines');
 const PostPitchingLines = require('./statRoutes/postPitchingLines');
 
+const GetFangraphStats = require('./fangraphRoutes/getFangraphStats');
+const PostFangraphsQuery = require('./fangraphRoutes/postFangraphsQuery');
+
+const PostSimulator = require('./gameSimulator/postSimulator');
+
 const Logger = require('./logger/logger');
 
 
@@ -27,6 +32,11 @@ Routes.get('/players/:id/pitching', GetPlayerPitching);
 
 Routes.post('/stats/battingLines', PostBattingLines);
 Routes.post('/stats/pitchingLines', PostPitchingLines);
+
+Routes.get('/stats/fangraphs', GetFangraphStats);
+Routes.post('/stats/fangraphs', PostFangraphsQuery);
+
+Routes.post('/simulate/lineup', PostSimulator);
 
 Routes.post('/logger', Logger);
 
