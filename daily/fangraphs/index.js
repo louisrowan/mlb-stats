@@ -2,10 +2,14 @@
 
 // node --max-old-space-size=8192 index.js 
 
+const mockAllGames = require('./mockAllGames.json');
+
+
 const Cheerio = require('cheerio');
 
 const GetPlayerData = require('./getPlayerData');
 const RankPitchers = require('./rankPitchers');
+const RankBatters = require('./rankBatters');
 const Upstream = require('./Upstream');
 
 
@@ -39,7 +43,7 @@ const getGames = (next) => { // get html
             });
         });
 
-        return next([games[2], games[3]]);
+        return next(games);
     });
 };
 
@@ -221,10 +225,22 @@ const getTeamStats = (team, cb) => {
 
 const handleAllDataFetched = (games) => {
 
-    const rankedPitchers = RankPitchers.rankRaw(games);
+    console.log(JSON.stringify(games, null, 2));
+
+    // console.log(JSON.stringify(games, null, 2));
+
+    const allPitchers = RankPitchers.rankRaw(games);
+    const allBatters = RankBatters.rankRaw(games);
+
+    allBatters.forEach((b) => {
+
+        console.log(b.name, b.totalPoints);
+    })
+
 }
 
 
 
-getGames(parseGames);
+// getGames(parseGames);
+handleAllDataFetched(mockAllGames);
 
