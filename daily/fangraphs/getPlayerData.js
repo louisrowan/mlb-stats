@@ -229,6 +229,8 @@ const getBatterData = (batter) => {
 
                 const player = {
                     name: batter.name,
+                    spotInOrder: batter.spotInOrder,
+                    positon: batter.position,
                     vsLeft,
                     vsRight,
                     total

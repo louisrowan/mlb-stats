@@ -1,5 +1,7 @@
 'use strict';
 
+// node --max-old-space-size=8192 index.js 
+
 const Cheerio = require('cheerio');
 
 const GetPlayerData = require('./getPlayerData');
@@ -23,10 +25,20 @@ const getGames = (next) => { // get html
 
         $('.lineup').each(function(i, element) {
 
-            games.push($(this));
+            const lineup = element;
+            const game = element.parent.parent;
+            const team1Name = game.children[0].children[0].children[0].data;
+            const team2Name = game.children[2].children[0].children[0].data;
+            
+
+            games.push({
+                team1Name,
+                team2Name,
+                lineups: $(this)
+            });
         });
 
-        return next(games);
+        return next([games[2], games[3]]);
     });
 };
 
@@ -34,11 +46,15 @@ const getGames = (next) => { // get html
 
 const parseGames = (games) => { // games by team
 
-    console.log('num teams', games.length);
+    const completedGames = [];
+    const numGames = games.length;
 
     games.forEach((game) => {
 
-        const rows = game.children().children('tr');
+        const team1Name = game.team1Name;
+        const team2Name = game.team2Name;
+
+        const rows = game.lineups.children().children('tr');
 
         let team1Rows = [];
         let team2Rows = [];
@@ -55,15 +71,55 @@ const parseGames = (games) => { // games by team
             })
         });
 
+        const setupRequests = (team1Rows, team2Rows) => {
 
-        const team1 = parseTeams(team1Rows);
-        const team2 = parseTeams(team2Rows);
+            return new Promise((resolve, reject) => {
+
+                let statsComplete = 0;
+                const game = {
+                    team1: {},
+                    team2: {}
+                };
+
+                parseTeams(team1Rows, (results) => {
+
+                    ++statsComplete;
+                    game.team1.stats = results;
+
+                    if (statsComplete === 2) {
+                        resolve(game);
+                    }
+                });
+
+                parseTeams(team2Rows, (results) => {
+
+                    ++statsComplete;
+                    game.team2.stats = results;
+
+                    if (statsComplete == 2) {
+                        resolve(game);
+                    }
+                })
+            })
+        }
+
+        setupRequests(team1Rows, team2Rows)
+            .then(game => {
+
+                game.team1.name = team1Name;
+                game.team2.name = team2Name;
+                completedGames.push(game);
+
+                if (completedGames.length === numGames) {
+                    return handleAllDataFetched(completedGames);
+                }
+            });
 
     })
 }
 
 
-const parseTeams = (rows) => { // split up pitcher and lineup
+const parseTeams = (rows, cb) => { // split up pitcher and lineup
 
     const team = {};
 
@@ -110,29 +166,61 @@ const parseTeams = (rows) => { // split up pitcher and lineup
 
     team.lineup = lineup;
 
-    return getTeamStats(team);
+    return getTeamStats(team, (result) => {
+
+        return cb(result);
+    });
 }
 
 let pC = 0;
 let lC = 0;
 
 
-const getTeamStats = (team) => {
+const getTeamStats = (team, cb) => {
+
+    let promisesComplete = 0;
+    const results = {};
 
     if (team.pitcher) {
         GetPlayerData.getPitcherData(team.pitcher, (result) => {
 
-            console.log('pitcher done', ++pC);
+            results.pitcher = result;
+            ++promisesComplete;
+            if (promisesComplete === 2) {
+                return cb(results);
+            }
         });
+    }
+    else {
+        ++promisesComplete;
+        if (promisesComplete === 2) {
+            return cb(results);
+        }
     }
 
     if (team.lineup) {
         GetPlayerData.getLineupData(team.lineup, (result) => {
 
-            console.log('lineup done', ++lC);
+            results.lineup = result;
+            ++promisesComplete;
+            if (promisesComplete === 2) {
+                return cb(results);
+            }
         });
     }
+    else {
+        ++promisesComplete;
+        if (promisesComplete === 2) {
+            return cb(results);
+        }
+    }
 
+}
+
+
+const handleAllDataFetched = (games) => {
+
+    console.log(JSON.stringify(games, null, 2));
 }
 
 
