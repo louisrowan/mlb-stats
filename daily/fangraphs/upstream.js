@@ -16,7 +16,7 @@ Upstream.get = (url, options, cb, retries = 0) => {
         if (!payload) {
 
             if (retries > 3) {
-                return cb(new Error('too many retries for', url));
+                return cb(new Error(`too many retries for ${url}`));
             }
             ++retries;
             return Upstream.get(url, options, cb, retries)

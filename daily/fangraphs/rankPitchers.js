@@ -27,5 +27,10 @@ exports.rankRaw = (games) => {
         return a.xFIP > b.xFIP ? 1 : -1;
     });
 
+    // console.log(sorted);
+
     return sorted;
 };
+
+
+

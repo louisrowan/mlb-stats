@@ -161,7 +161,8 @@ exports.getPitcherData = (pitcher, cb) => {
     Upstream.get(url, {}, (err, res, payload) => {
 
         if (!payload) {
-            console.log('no pl', url);
+            console.log('no pl for get pitcher', pitcher, url);
+            return cb(new Error());
         }
 
         const html = payload.toString();
@@ -179,7 +180,7 @@ exports.getPitcherData = (pitcher, cb) => {
             ...mapStatsToHeaders(playerStats, headers)
         };
 
-        return cb(player);
+        return cb(null, player);
     });
 };
 
@@ -206,7 +207,11 @@ exports.getLineupData = (lineup, cb) => {
     Promise.all(promises)
         .then((res) => {
 
-            return cb(res);
+            return cb(null, res);
+        })
+        .catch(err => {
+
+            return cb(err);
         });
 };
 
@@ -230,15 +235,19 @@ const getBatterData = (batter) => {
                 const player = {
                     name: batter.name,
                     spotInOrder: batter.spotInOrder,
-                    positon: batter.position,
+                    position: batter.position,
                     vsLeft,
                     vsRight,
                     total
                 };
 
-                resolve(player);
+                return resolve(player);
             })
-            .catch(err => console.log('err', err));
+            .catch(err => {
+
+                console.log('error getting batting data', err);
+                return resolve();
+            })
     });
 }
 
@@ -253,11 +262,12 @@ const getBattingStats = (batter, splits) => {
         Upstream.get(url, {}, (err, res, payload) => {
 
             if (err) {
-                reject(err);
+                return reject(err);
             }
 
             if (!payload) {
                 console.log('no pl', url);
+                return reject();
             }
             else {
                 '.'
