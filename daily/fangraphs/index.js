@@ -8,6 +8,7 @@ const mockAllGames = require('./mockAllGames.json');
 const Cheerio = require('cheerio');
 
 const GetPlayerData = require('./getPlayerData');
+const GenerateLineup = require('./generateLineup');
 const RankPitchers = require('./rankPitchers');
 const RankBatters = require('./rankBatters');
 const Upstream = require('./Upstream');
@@ -19,7 +20,7 @@ const domain = 'https://www.fangraphs.com';
 
 const getGames = (next) => { // get html
 
-    const path = '/livescoreboard.aspx?date=2018-06-01';
+    const path = '/livescoreboard.aspx?date=2018-06-07';
 
     Upstream.get(domain + path, {}, (err, res, payload) => {
 
@@ -52,7 +53,7 @@ const getGames = (next) => { // get html
 const parseGames = (games) => { // games by team
 
     const completedGames = [];
-    const numGames = games.length;
+    let numGames = games.length;
 
     games.forEach((game) => {
 
@@ -86,7 +87,11 @@ const parseGames = (games) => { // games by team
                     team2: {}
                 };
 
-                parseTeams(team1Rows, (results) => {
+                parseTeams(team1Rows, (err, results) => {
+
+                    if (err) {
+                        return reject();
+                    }
 
                     ++statsComplete;
                     game.team1.stats = results;
@@ -96,7 +101,11 @@ const parseGames = (games) => { // games by team
                     }
                 });
 
-                parseTeams(team2Rows, (results) => {
+                parseTeams(team2Rows, (err, results) => {
+
+                    if (err) {
+                        return reject();
+                    }
 
                     ++statsComplete;
                     game.team2.stats = results;
@@ -118,7 +127,15 @@ const parseGames = (games) => { // games by team
                 if (completedGames.length === numGames) {
                     return handleAllDataFetched(completedGames);
                 }
-            });
+            })
+            .catch(() => {
+
+                --numGames;
+
+                if (completedGames.length === numGames) {
+                    return handleAllDataFetched(completedGames);
+                }
+            })
 
     })
 }
@@ -142,7 +159,10 @@ const parseTeams = (rows, cb) => { // split up pitcher and lineup
     }
 
     if (!rows[1]) { // lineup not announced yet
-        return getTeamStats(team)
+        return cb('no lineup');
+    }
+    else {
+        console.log('line up found for', team.pitcher.name);
     }
 
     const positionPlayersData = rows[1].children;
@@ -152,17 +172,24 @@ const parseTeams = (rows, cb) => { // split up pitcher and lineup
     let lineupIndex = 1;
     while (i < positionPlayersData.length) { // parse lineup data to format batting order
 
-        const spotInOrder = lineupIndex;
-        const name = positionPlayersData[i + 1].children[0].data;
-        const href = positionPlayersData[i + 1].attribs.href;
-        const position = positionPlayersData[i + 2].data;
+        try {
 
-        lineup[spotInOrder] = {
-            spotInOrder,
-            name,
-            href,
-            position
-        };
+            const spotInOrder = lineupIndex;
+            const name = positionPlayersData[i + 1].children[0].data;
+            const href = positionPlayersData[i + 1].attribs.href;
+            const position = positionPlayersData[i + 2].data;
+
+            lineup[spotInOrder] = {
+                spotInOrder,
+                name,
+                href,
+                position
+            };
+
+        }
+        catch (err) { // no player link
+            console.log(team.pitcher.name, 'lineup parse err', i, lineupIndex);
+        }
 
         i += 4;
         lineupIndex++;
@@ -171,14 +198,11 @@ const parseTeams = (rows, cb) => { // split up pitcher and lineup
 
     team.lineup = lineup;
 
-    return getTeamStats(team, (result) => {
+    return getTeamStats(team, (err, result) => {
 
-        return cb(result);
+        return cb(err, result);
     });
 }
-
-let pC = 0;
-let lC = 0;
 
 
 const getTeamStats = (team, cb) => {
@@ -187,36 +211,45 @@ const getTeamStats = (team, cb) => {
     const results = {};
 
     if (team.pitcher) {
-        GetPlayerData.getPitcherData(team.pitcher, (result) => {
+        GetPlayerData.getPitcherData(team.pitcher, (err, result) => {
+
+            if (err) {
+                return cb(err, results);
+            }
 
             results.pitcher = result;
             ++promisesComplete;
             if (promisesComplete === 2) {
-                return cb(results);
+                return cb(null, results);
             }
         });
     }
     else {
         ++promisesComplete;
         if (promisesComplete === 2) {
-            return cb(results);
+            return cb(null, results);
         }
     }
 
     if (team.lineup) {
-        GetPlayerData.getLineupData(team.lineup, (result) => {
+        GetPlayerData.getLineupData(team.lineup, (err, result) => {
 
-            results.lineup = result;
+            if (err) {
+                console.log('lineup err', err);
+                return cb(err, results);
+            }
+
+            results.lineup = result.filter(p => p !== null);
             ++promisesComplete;
             if (promisesComplete === 2) {
-                return cb(results);
+                return cb(null, results);
             }
         });
     }
     else {
         ++promisesComplete;
         if (promisesComplete === 2) {
-            return cb(results);
+            return cb(null, results);
         }
     }
 
@@ -225,22 +258,40 @@ const getTeamStats = (team, cb) => {
 
 const handleAllDataFetched = (games) => {
 
-    console.log(JSON.stringify(games, null, 2));
 
     // console.log(JSON.stringify(games, null, 2));
 
     const allPitchers = RankPitchers.rankRaw(games);
     const allBatters = RankBatters.rankRaw(games);
 
-    allBatters.forEach((b) => {
+    // const pos = {};
 
-        console.log(b.name, b.totalPoints);
-    })
+    // allBatters.forEach((b) => {
+    //     pos[b.position] ? pos[b.position].push(b) : pos[b.position] = [b];
+    // });
+
+    // Object.keys(pos).forEach((position) => {
+
+    //     console.log('');
+    //     console.log(position);
+    //     pos[position].forEach((player) => {
+    //         console.log(player.name, player.totalPoints.toFixed(3));
+    //     });
+    // });
+
+
+    const battersWithSalaries = GenerateLineup.battersWithSalaries(allBatters);
+    const pitchersWithSalaries = GenerateLineup.pitchersWithSalaries(allPitchers)
+
+    const lineup = GenerateLineup.generate(battersWithSalaries, pitchersWithSalaries);
+
 
 }
 
 
 
+
+
 // getGames(parseGames);
-handleAllDataFetched(mockAllGames);
+handleAllDataFetched(require('./fixtures/games_6_5.json'));
 
