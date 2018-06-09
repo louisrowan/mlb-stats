@@ -27,6 +27,11 @@ exports.rankRaw = (games) => {
         return a.xFIP > b.xFIP ? 1 : -1;
     });
 
+    sorted.forEach(s => {
+
+        console.log(s.name, s.xFIP);
+    })
+
     // console.log(sorted);
 
     return sorted;

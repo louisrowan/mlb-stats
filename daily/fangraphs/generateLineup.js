@@ -1,8 +1,11 @@
 'use strict';
 
+const { DATE } = require('./');
+
+
 const Fs = require('fs');
 const Path = require('path');
-const SalariesPath = Path.resolve(__dirname, './fixtures/salaries.csv');
+const SalariesPath = Path.resolve(__dirname, './fixtures/salaries_' + DATE + '.csv');
 const salaries = Fs.readFileSync(SalariesPath, 'utf-8').split('\n');
 
 
@@ -105,6 +108,7 @@ const filterPositions = (players, buffer) => {
         }
 
         if (betterPlayers > buffer) {
+            console.log('filter out', p.name, p.position);
             return false;
         }
         return true;
@@ -118,7 +122,9 @@ exports.generate = (battersWithSalaries, pitchersWithSalaries) => {
     const sorted = battersWithSalaries.sort((a, b) => {
 
         return a.pointsPerK > b.pointsPerK ? -1 : 1
-    })
+    }).filter(b => b.total.AB > 80);
+
+    console.log('total player', sorted.length);
     
     const catchers = filterPositions(sorted.filter(p => p.position === 'C'), 0);
     const firstBasemen = filterPositions(sorted.filter(p => p.position === '1B'), 0);
@@ -138,6 +144,8 @@ exports.generate = (battersWithSalaries, pitchersWithSalaries) => {
         const catcher = catchers[catcherI];
 
         console.log('catcher', catcherI + 1, '/', catchers.length);
+        console.log(Date.now() - start);
+        console.log('');
 
         for (let firstBasemenI = 0; firstBasemenI < firstBasemen.length; ++firstBasemenI) {
 
@@ -225,11 +233,17 @@ exports.generate = (battersWithSalaries, pitchersWithSalaries) => {
 
     highestLineup.forEach(p => {
 
+        const isPitcher = !p.spotInOrder;
+
+        const FIP = !isPitcher && p.opponent.FIP && p.opponent.xFIP ? (+p.opponent.FIP + +p.opponent.xFIP)/2 : 'N/A';
+
         console.log(
-            p.position.padEnd(5, ''),
-            p.name.padEnd(15, ''),
-            p.totalPoints.toFixed(2).padEnd(5, ''),
-            p.salary.toString().padEnd(5, '')
+            p.position.padEnd(5, ' '),
+            p.name.padEnd(15, ' '),
+            p.totalPoints.toFixed(2).padEnd(5, ' '),
+            p.salary.toString().padEnd(5, ' '),
+            !isPitcher ? p.opponent.name.padEnd(15, ' ') : '',
+            !isPitcher ? `FIP: ${FIP}`.padEnd(10, ' ') : ''
         );
     })
 
