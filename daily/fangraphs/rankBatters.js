@@ -11,10 +11,7 @@ exports.rankRaw = (games) => {
 
             gameBatters.push({
                 ...batter,
-                opponent: {
-                    name: game.team2.stats.pitcher.name,
-                    handedness: game.team2.stats.pitcher.handedness
-                }
+                opponent: game.team2.stats.pitcher
             });
         });
 
@@ -22,10 +19,7 @@ exports.rankRaw = (games) => {
 
             gameBatters.push({
                 ...batter,
-                opponent: {
-                    name: game.team1.stats.pitcher.name,
-                    handedness: game.team1.stats.pitcher.handedness
-                }
+                opponent: game.team1.stats.pitcher
             });
         });
         allBatters = allBatters.concat(gameBatters);
@@ -44,48 +38,49 @@ const rawGamePrediction = (batter) => {
     const paVsStarter = 2 + (1 - (batter.spotInOrder/10));
     const paVsReliever = 2;
     const starterHandedness = batter.opponent.handedness;
+    const pitcherMultiplier = calculatePitcherMultiplier(batter.opponent);
 
-    const _single_VsStarter = calculateStat(batter, '1B', starterHandedness) * paVsStarter;
-    const _single_VsReliever = calculateStat(batter, '1B', starterHandedness) * paVsReliever;
+    const _single_VsStarter = calculateStat(batter, '1B', starterHandedness, pitcherMultiplier) * paVsStarter;
+    const _single_VsReliever = calculateStat(batter, '1B', starterHandedness, pitcherMultiplier) * paVsReliever;
     const total_single_ = _single_VsStarter + _single_VsReliever;
     const total_single_Points = total_single_ * 3;
 
-    const _double_VsStarter = calculateStat(batter, '2B', starterHandedness) * paVsStarter;
-    const _double_VsReliever = calculateStat(batter, '2B', starterHandedness) * paVsReliever;
+    const _double_VsStarter = calculateStat(batter, '2B', starterHandedness, pitcherMultiplier) * paVsStarter;
+    const _double_VsReliever = calculateStat(batter, '2B', starterHandedness, pitcherMultiplier) * paVsReliever;
     const total_double_ = _double_VsStarter + _double_VsReliever;
     const total_double_Points = total_double_ * 5;
 
-    const _triple_VsStarter = calculateStat(batter, '3B', starterHandedness) * paVsStarter;
-    const _triple_VsReliever = calculateStat(batter, '3B', starterHandedness) * paVsReliever;
+    const _triple_VsStarter = calculateStat(batter, '3B', starterHandedness, pitcherMultiplier) * paVsStarter;
+    const _triple_VsReliever = calculateStat(batter, '3B', starterHandedness, pitcherMultiplier) * paVsReliever;
     const total_triple_ = _triple_VsStarter + _triple_VsReliever;
     const total_triple_Points = total_triple_ * 8;
 
-    const _hr_VsStarter = calculateStat(batter, 'HR', starterHandedness) * paVsStarter;
-    const _hr_VsReliever = calculateStat(batter, 'HR', starterHandedness) * paVsReliever;
+    const _hr_VsStarter = calculateStat(batter, 'HR', starterHandedness, pitcherMultiplier) * paVsStarter;
+    const _hr_VsReliever = calculateStat(batter, 'HR', starterHandedness, pitcherMultiplier) * paVsReliever;
     const total_hr_ = _hr_VsStarter + _hr_VsReliever;
     const total_hr_Points = total_hr_ * 10;
 
-    const _rbi_VsStarter = calculateStat(batter, 'RBI', starterHandedness) * paVsStarter;
-    const _rbi_VsReliever = calculateStat(batter, 'RBI', starterHandedness) * paVsReliever;
+    const _rbi_VsStarter = calculateStat(batter, 'RBI', starterHandedness, pitcherMultiplier) * paVsStarter;
+    const _rbi_VsReliever = calculateStat(batter, 'RBI', starterHandedness, pitcherMultiplier) * paVsReliever;
     const total_rbi_ = _rbi_VsStarter + _rbi_VsReliever;
     const total_rbi_Points = total_rbi_ * 2;
 
-    const _r_VsStarter = calculateStat(batter, 'R', starterHandedness) * paVsStarter;
-    const _r_VsReliever = calculateStat(batter, 'R', starterHandedness) * paVsReliever;
+    const _r_VsStarter = calculateStat(batter, 'R', starterHandedness, pitcherMultiplier) * paVsStarter;
+    const _r_VsReliever = calculateStat(batter, 'R', starterHandedness, pitcherMultiplier) * paVsReliever;
     const total_r_ = _r_VsStarter + _r_VsReliever;
     const total_r_Points = total_r_ * 2;
 
-    const _bb_VsStarter = calculateStat(batter, 'BB', starterHandedness) * paVsStarter;
-    const _bb_VsReliever = calculateStat(batter, 'BB', starterHandedness) * paVsReliever;
+    const _bb_VsStarter = calculateStat(batter, 'BB', starterHandedness, pitcherMultiplier) * paVsStarter;
+    const _bb_VsReliever = calculateStat(batter, 'BB', starterHandedness, pitcherMultiplier) * paVsReliever;
     const total_bb_ = _bb_VsStarter + _bb_VsReliever;
     const total_bb_Points = total_bb_ * 2;
 
-    const _hbp_VsStarter = calculateStat(batter, 'HBP', starterHandedness) * paVsStarter;
-    const _hbp_VsReliever = calculateStat(batter, 'HBP', starterHandedness) * paVsReliever;
+    const _hbp_VsStarter = calculateStat(batter, 'HBP', starterHandedness, pitcherMultiplier) * paVsStarter;
+    const _hbp_VsReliever = calculateStat(batter, 'HBP', starterHandedness, pitcherMultiplier) * paVsReliever;
     const total_hbp_ = _hbp_VsStarter + _hbp_VsReliever;
     const total_hbp_Points = total_hbp_ * 2;
 
-    const _sb_VsStarter = calculateStat(batter, 'SB', starterHandedness) * paVsStarter;
+    const _sb_VsStarter = calculateStat(batter, 'SB', starterHandedness, pitcherMultiplier) * paVsStarter;
     const _sb_VsReliever = calculateStat(batter, 'SB', starterHandedness) * paVsReliever;
     const total_sb_ = _sb_VsStarter + _sb_VsReliever;
     const total_sb_Points = total_sb_ * 5;
@@ -108,11 +103,28 @@ const rawGamePrediction = (batter) => {
 }
 
 
+const calculatePitcherMultiplier = (pitcher) => {
 
-const calculateStat = (batter, stat, hand) => {
+    if (!pitcher.IP || +pitcher.IP < 10) {
+        return 1.25;
+    }
+
+    let fip = (+pitcher.FIP + +pitcher.xFIP)/2;
+    if (fip < 2) fip = 2;
+    if (fip > 6) fip = 6;
+
+    const normalized = ((fip - 2)/(6 - 2)) + .5;
+    const buffer = normalized - 1;
+    return 1 + (buffer/2);
+}
+
+
+
+
+const calculateStat = (batter, stat, hand, pitcherMultiplier) => {
 
     const stats = batter[selectStats(hand)];
-    return (stats[stat]/stats.PA) || 0;
+    return ((stats[stat]/stats.PA) * pitcherMultiplier) || 0;
 }
 
 

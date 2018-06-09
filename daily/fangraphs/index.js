@@ -2,6 +2,15 @@
 
 // node --max-old-space-size=8192 index.js 
 
+
+const DATE = exports.DATE = '06-09';
+const PATH_TO_FILE = './fixtures/games_' + DATE + '.json';
+
+const Fs = require('fs');
+const Path = require('path');
+
+
+
 const mockAllGames = require('./mockAllGames.json');
 
 
@@ -20,7 +29,7 @@ const domain = 'https://www.fangraphs.com';
 
 const getGames = (next) => { // get html
 
-    const path = '/livescoreboard.aspx?date=2018-06-07';
+    const path = '/livescoreboard.aspx?date=2018-' + DATE;
 
     Upstream.get(domain + path, {}, (err, res, payload) => {
 
@@ -50,7 +59,7 @@ const getGames = (next) => { // get html
 
 
 
-const parseGames = (games) => { // games by team
+const parseGames = (games) => { // split game html into teams
 
     const completedGames = [];
     let numGames = games.length;
@@ -77,7 +86,7 @@ const parseGames = (games) => { // games by team
             })
         });
 
-        const setupRequests = (team1Rows, team2Rows) => {
+        const setupRequests = (team1Rows, team2Rows) => { // get player data
 
             return new Promise((resolve, reject) => {
 
@@ -125,7 +134,7 @@ const parseGames = (games) => { // games by team
                 completedGames.push(game);
 
                 if (completedGames.length === numGames) {
-                    return handleAllDataFetched(completedGames);
+                    writeGamesToFile(completedGames);
                 }
             })
             .catch(() => {
@@ -133,12 +142,22 @@ const parseGames = (games) => { // games by team
                 --numGames;
 
                 if (completedGames.length === numGames) {
-                    return handleAllDataFetched(completedGames);
+                    writeGamesToFile(completedGames);
                 }
             })
 
     })
 }
+
+
+const writeGamesToFile = (completedGames) => {
+
+    Fs.writeFileSync(
+        Path.resolve(__dirname, PATH_TO_FILE),
+        JSON.stringify(completedGames, null, 2)
+    );
+};
+
 
 
 const parseTeams = (rows, cb) => { // split up pitcher and lineup
@@ -205,7 +224,7 @@ const parseTeams = (rows, cb) => { // split up pitcher and lineup
 }
 
 
-const getTeamStats = (team, cb) => {
+const getTeamStats = (team, cb) => { // get pitcher and lineup data
 
     let promisesComplete = 0;
     const results = {};
@@ -256,7 +275,16 @@ const getTeamStats = (team, cb) => {
 }
 
 
-const handleAllDataFetched = (games) => {
+const handleAllDataFetched = (games) => { // print stuff to screen and generate lineups
+
+
+    games.forEach((g) => {
+
+        console.log(g.team1.name);
+        console.log(g.team2.name);
+    });
+    console.log(games.length * 2);
+    console.log('');
 
 
     // console.log(JSON.stringify(games, null, 2));
@@ -264,20 +292,22 @@ const handleAllDataFetched = (games) => {
     const allPitchers = RankPitchers.rankRaw(games);
     const allBatters = RankBatters.rankRaw(games);
 
-    // const pos = {};
+    const pos = {};
 
-    // allBatters.forEach((b) => {
-    //     pos[b.position] ? pos[b.position].push(b) : pos[b.position] = [b];
-    // });
+    allBatters.forEach((b) => {
+        pos[b.position] ? pos[b.position].push(b) : pos[b.position] = [b];
+    });
 
-    // Object.keys(pos).forEach((position) => {
+    Object.keys(pos).forEach((position) => {
 
-    //     console.log('');
-    //     console.log(position);
-    //     pos[position].forEach((player) => {
-    //         console.log(player.name, player.totalPoints.toFixed(3));
-    //     });
-    // });
+        console.log('');
+        console.log(position);
+        pos[position].forEach((player) => {
+            console.log(player.name, player.totalPoints.toFixed(3));
+        });
+    });
+
+    console.log('total games is', games.length);
 
 
     const battersWithSalaries = GenerateLineup.battersWithSalaries(allBatters);
@@ -293,5 +323,5 @@ const handleAllDataFetched = (games) => {
 
 
 // getGames(parseGames);
-handleAllDataFetched(require('./fixtures/games_6_5.json'));
+handleAllDataFetched(require(PATH_TO_FILE));
 
