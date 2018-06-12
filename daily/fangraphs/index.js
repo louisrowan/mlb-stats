@@ -322,6 +322,6 @@ const handleAllDataFetched = (games) => { // print stuff to screen and generate 
 
 
 
-// getGames(parseGames);
-handleAllDataFetched(require(PATH_TO_FILE));
+getGames(parseGames);
+// handleAllDataFetched(require(PATH_TO_FILE));
 

@@ -2,35 +2,11 @@
 
 const Cheerio = require('cheerio');
 
+const Common = require('./common');
 const Upstream = require('./upstream');
+
 const domain = 'https://www.fangraphs.com';
 
-
-
-const formatHeaders = (id, $) => {
-
-    const headers = {};
-    const headerTDs = $(`#${id} th`);
-
-    headerTDs.each((i, header) => {
-
-        let value;
-        if (header.children[0].children) {
-            value = header.children[0].children[0].data;
-
-        }
-        else {
-            value = header.children[0].data;
-        }
-
-        headers[i] = {
-            index: i,
-            value
-        }
-    });
-
-    return headers;
-};
 
 
 const findStatRowYear = (id, $) => {
@@ -170,7 +146,7 @@ exports.getPitcherData = (pitcher, cb) => {
 
         const standardTableId = 'SeasonStats1_dgSeason11_ctl00';
 
-        const headers = formatHeaders(standardTableId, $);
+        const headers = Common.formatHeaders(standardTableId, $);
         const currentYear = findStatRowYear(standardTableId, $);
         const playerStats = pushYearTDsIntoRow(currentYear);
 
@@ -185,11 +161,6 @@ exports.getPitcherData = (pitcher, cb) => {
 };
 
 
-
-// { spotInOrder: 7,
-//   name: 'Denard Span',
-//   href: 'statss.aspx?playerid=8347&position=OF',
-//   position: ' (LF)' }
 
 
 
@@ -287,8 +258,8 @@ const formatSplitBattingStats = ($) => {
     const standardTableId = 'SeasonSplits1_dgSeason1_ctl00';
     const advancedTableId = 'SeasonSplits1_dgSeason2_ctl00';
 
-    const standardHeaders = formatHeaders(standardTableId, $);
-    const advancedHeaders = formatHeaders(advancedTableId, $);
+    const standardHeaders = Common.formatHeaders(standardTableId, $);
+    const advancedHeaders = Common.formatHeaders(advancedTableId, $);
 
     const vsLeftRowStandard = findStatRowSplit(standardTableId, $, 'vs L');
     const vsRightRowStandard = findStatRowSplit(standardTableId, $, 'vs R');
@@ -319,8 +290,8 @@ const formatTotalBattingStats = ($) => {
     const standardTableId = 'SeasonStats1_dgSeason1_ctl00';
     const advancedTableId = 'SeasonStats1_dgSeason2_ctl00';
 
-    const standardHeaders = formatHeaders(standardTableId, $);
-    const advancedHeaders = formatHeaders(advancedTableId, $);
+    const standardHeaders = Common.formatHeaders(standardTableId, $);
+    const advancedHeaders = Common.formatHeaders(advancedTableId, $);
 
     const rowStandard = findStatRowYear(standardTableId, $);
     const rowAdvanced = findStatRowYear(advancedTableId, $);

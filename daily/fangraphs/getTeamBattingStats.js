@@ -1,6 +1,8 @@
 'use strict';
 
 const Cheerio = require('cheerio');
+
+const Common = require('./common');
 const Upstream = require('./upstream');
 
 const domain = 'https://www.fangraphs.com';
@@ -26,6 +28,37 @@ const getTeamBattingStats = () => {
 };
 
 
+
+const findTeamBattingStatRow = (id, $) => {
+
+    const teamTable = $(`#${id}`);
+    const rows = teamTable.children('tbody').children('tr');
+    return rows;
+}
+
+
+const formatTeamRows = (rows, headers) => {
+
+    const teams = [];
+
+    rows.each((i, row) => {
+
+        const team = {};
+
+        const tds = row.children('td');
+        console.log(tds);
+
+        console.log(row);
+
+        row.children('td').each((i, td) => {
+
+            console.log('td', td);
+        })
+
+    })
+}
+
+
 const formatTeamBattingStats = (html) => {
 
     return new Promise((resolve, reject) => {
@@ -33,28 +66,13 @@ const formatTeamBattingStats = (html) => {
         const $ = Cheerio.load(html);
 
         const standardTableId = 'LeaderBoard1_dg1_ctl00';
+        const headers = Common.formatHeaders(standardTableId, $);
+        const teamBattingRows = findTeamBattingStatRow(standardTableId, $);
+        const formattedTeamBattingStats = formatTeamRows(teamBattingRows, headers);
 
-        const headers = formatHeaders(standardTableId, $);
-        const 
-
-        console.log($);
         return resolve();
     });
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
